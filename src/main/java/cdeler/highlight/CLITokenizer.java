@@ -9,14 +9,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CLITokenizer extends AbstractTokenizer {
+public class CLITokenizer extends AbstractTokenizer<List<String>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CLITokenizer.class);
     private final String executablePath;
 
@@ -48,13 +49,11 @@ public class CLITokenizer extends AbstractTokenizer {
     }
 
     @Override
-    Stream<Token> build(List<String> data) {
-        return null;
-        //return data.stream().map((String line) -> {
-        //});
+    List<Token> build(List<String> data) {
+        return data.stream().map(SourceToken::fromTreeSitterLine).flatMap(Optional::stream).collect(Collectors.toList());
     }
 
-    private List<String> spawnChildProcess(final File sourceFile) throws IOException {
+    List<String> spawnChildProcess(final File sourceFile) throws IOException {
         List<String> result = Collections.emptyList();
         final ProcessBuilder processBuilder =
                 new ProcessBuilder(executablePath, "parse", sourceFile.getAbsolutePath());

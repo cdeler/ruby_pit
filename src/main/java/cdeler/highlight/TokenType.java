@@ -4,7 +4,8 @@ public enum TokenType {
     KEYWORD,
     IDENTIFIER,
     STRING,
-    WORD;
+    WORD,
+    UNKNOWN_TYPE;
 
     public static TokenType getEnum(String val) {
         switch (val) {
@@ -13,7 +14,7 @@ public enum TokenType {
             case "string":
                 return TokenType.STRING;
             default:
-                return TokenType.WORD;
+                return TokenType.UNKNOWN_TYPE;
         }
     }
 }

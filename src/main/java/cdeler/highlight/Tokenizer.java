@@ -1,8 +1,8 @@
 package cdeler.highlight;
 
 import java.io.InputStream;
-import java.util.stream.Stream;
+import java.util.List;
 
 public interface Tokenizer {
-    Stream<Token> harvest(InputStream is);
+    List<Token> harvest(InputStream is);
 }

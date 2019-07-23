@@ -20,13 +20,16 @@ public class SourceToken implements Token {
 
         if (matcher.matches()) {
             var tokenType = TokenType.getEnum(matcher.group(1));
-            int beginLine = Integer.valueOf(matcher.group(2));
-            int beginColumn = Integer.valueOf(matcher.group(3));
-            int endLine = Integer.valueOf(matcher.group(4));
-            int endColumn = Integer.valueOf(matcher.group(5));
 
-            return Optional.of(new SourceToken(tokenType,
-                    new TokenLocation(beginLine, beginColumn, endLine, endColumn)));
+            if (tokenType != TokenType.UNKNOWN_TYPE) {
+                int beginLine = Integer.valueOf(matcher.group(2));
+                int beginColumn = Integer.valueOf(matcher.group(3));
+                int endLine = Integer.valueOf(matcher.group(4));
+                int endColumn = Integer.valueOf(matcher.group(5));
+
+                return Optional.of(new SourceToken(tokenType,
+                        new TokenLocation(beginLine, beginColumn, endLine, endColumn)));
+            }
         }
 
         return Optional.empty();

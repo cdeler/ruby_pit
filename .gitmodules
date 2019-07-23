@@ -1,0 +1,3 @@
+[submodule "src/main/resources/tree-sitter-ruby"]
+	path = src/main/resources/tree-sitter-ruby
+	url = git@github.com:tree-sitter/tree-sitter-ruby.git
