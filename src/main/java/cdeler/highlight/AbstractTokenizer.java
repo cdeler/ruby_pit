@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTokenizer<T> implements Tokenizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTokenizer.class);
 
-    abstract T feed(InputStream is) throws HighlightException;
+    protected abstract T feed(InputStream is) throws HighlightException;
 
-    abstract List<Token> build(T data);
+    protected abstract List<Token> build(T data);
 
     @Override
     public List<Token> harvest(InputStream is) {

@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/beans ">
+
+    <bean id="tokenizer" class="cdeler.highlight.CLITokenizer">
+        <constructor-arg index="0" value="/tree-sitter/tree-sitter"/>
+    </bean>
+
+    <bean id="main_application" class="cdeler.ide.Ide">
+        <constructor-arg index="0" value="800"/>
+        <constructor-arg index="1" value="600"/>
+        <constructor-arg index="2" value="/icons8-ruby-programming-language-64.png"/>
+        <constructor-arg index="3" value="Ruby Pit"/>
+    </bean>
+
+</beans>

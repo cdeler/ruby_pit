@@ -26,7 +26,7 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
     }
 
     @Override
-    public List<String> feed(InputStream is) throws HighlightException {
+    protected List<String> feed(InputStream is) throws HighlightException {
         File sourceFile = null;
 
         try {
@@ -49,12 +49,13 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
     }
 
     @Override
-    List<Token> build(List<String> data) {
+    protected List<Token> build(List<String> data) {
         return data.stream().map(SourceToken::fromTreeSitterLine).flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     List<String> spawnChildProcess(final File sourceFile) throws IOException {
-        List<String> result = Collections.emptyList();
+        List<String> result;
+
         final ProcessBuilder processBuilder =
                 new ProcessBuilder(executablePath, "parse", sourceFile.getAbsolutePath());
 
@@ -62,6 +63,11 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
 
         try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             result = (List<String>) IOUtils.readLines(in);
+
+            process.wait();
+        } catch (InterruptedException ex) {
+            LOGGER.error("Subprocess spawn error", ex);
+            result = Collections.emptyList();
         }
 
         return result;

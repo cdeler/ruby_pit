@@ -19,7 +19,7 @@ task fatJar(type: Jar) {
                 'Implementation-Version': version,
                 'Main-Class': 'cdeler.ide.IdeMain'
     }
-    baseName = project.name + '-all'
+    baseName = project.name + '-bundle'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
@@ -29,5 +29,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
+    compile group: 'org.springframework', name: 'spring-core', version: '5.1.8.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context', version: '5.1.8.RELEASE'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'}
