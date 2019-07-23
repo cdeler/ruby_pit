@@ -25,10 +25,9 @@ public class ClITokenizerUnittest {
         final String helloWorldSource = "puts \"Hello World\"";
 
         // when
-        tok.feed(IOUtils.toInputStream(helloWorldSource));
+        var tokenStream = tok.harvest(IOUtils.toInputStream(helloWorldSource)).collect(Collectors.toList());
 
         // then
-        var tokenStream = tok.harvest().collect(Collectors.toList());
         assertEquals(2, tokenStream.size());
 
         var firstToken = tokenStream.get(0);
