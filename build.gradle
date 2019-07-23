@@ -11,6 +11,20 @@ repositories {
     mavenCentral()
 }
 
+// create a single Jar with all dependencies
+// from https://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'RubyPit IDE',
+                'Implementation-Version': version,
+                'Main-Class': 'cdeler.ide.IdeMain'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 dependencies {
+    // compile group: 'com.intellij', name: 'forms_rt', version: '7.0.3'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
