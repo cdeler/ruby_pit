@@ -29,11 +29,6 @@ public class ArraySourceLine implements SourceLine {
     }
 
     @Override
-    public void insertAt(int pos, CharSequence data) {
-
-    }
-
-    @Override
     public void insertAt(int pos, char c) {
         preInsertCheck();
 
@@ -118,6 +113,25 @@ public class ArraySourceLine implements SourceLine {
 
     public int length() {
         return endPosition - beginPosition;
+    }
+
+    @Override
+    public void removeAt(int firstDeletedSymbolPosition, int deleteLen) {
+        if (0 <= firstDeletedSymbolPosition && firstDeletedSymbolPosition < length()) {
+            if (beginPosition + firstDeletedSymbolPosition + deleteLen >= endPosition) {
+                endPosition = beginPosition + firstDeletedSymbolPosition;
+            } else {
+                var restLength = length() - (firstDeletedSymbolPosition + deleteLen);
+                System.arraycopy(
+                        line,
+                        beginPosition + firstDeletedSymbolPosition + deleteLen,
+                        line,
+                        beginPosition + firstDeletedSymbolPosition,
+                        restLength);
+
+                endPosition = beginPosition + firstDeletedSymbolPosition + restLength;
+            }
+        }
     }
 
     public String toString() {

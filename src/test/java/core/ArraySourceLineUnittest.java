@@ -70,7 +70,30 @@ public class ArraySourceLineUnittest {
 
         // then
         assertEquals(symbols, line.toString());
+    }
 
+    @Test
+    public void testRemoveFromEnd() {
+        // given
+        SourceLine line = new ArraySourceLine("0123456789");
+
+        // when
+        line.removeAt(7, 9);
+
+        // then
+        assertEquals("0123456", line.toString());
+    }
+
+    @Test
+    public void testDeleteFromMiddle() {
+        // given
+        SourceLine line = new ArraySourceLine("0123456789");
+
+        // when
+        line.removeAt(1, 8);
+
+        // then
+        assertEquals("09", line.toString());
     }
 
 }

@@ -1,16 +1,20 @@
 package cdeler.core;
 
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.List;
 
 public interface SourceStorage {
     char getCharAt(int lineNumber, int position);
 
     void insertCharAt(int lineNumber, int position, char symbol);
 
-    void insertCharAt(int lineNumber, int position, CharSequence symbols);
+    void load(InputStream is) throws IDEException;
 
-    void load(InputStream is);
+    void deleteLine(int lineNum);
 
-    OutputStream dump();
+    void insertLine(int lineNum, String sourceLine);
+
+    void insertLine(int lineNum);
+
+    List<String> dump();
 }
