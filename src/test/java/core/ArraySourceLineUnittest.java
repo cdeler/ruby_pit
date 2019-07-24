@@ -26,4 +26,51 @@ public class ArraySourceLineUnittest {
             assertEquals(inputString.charAt(i), line.charAt(i));
         }
     }
+
+    @Test
+    public void testInsertAtEnd() {
+        // given
+        String symbols = "1234567890abcdefghijklmnopqrstuvwxyz";
+        SourceLine line = new ArraySourceLine();
+
+        // when
+        for (int i = 0; i < symbols.length(); i++) {
+            line.insertAt(line.length(), symbols.charAt(i));
+        }
+
+        // then
+        assertEquals(symbols, line.toString());
+    }
+
+    @Test
+    public void testInsertAtBegin() {
+        // given
+        String symbols = "1234567890abcdefghijklmnopqrstuvwxyz";
+        SourceLine line = new ArraySourceLine();
+
+        // when
+        for (int i = symbols.length() - 1; i >= 0; i--) {
+            line.insertAt(0, symbols.charAt(i));
+        }
+
+        // then
+        assertEquals(symbols, line.toString());
+    }
+
+    @Test
+    public void testInsertIntoMiddle() {
+        // given
+        String symbols = "1234567890abcdefghijklmnopqrstuvwxyz";
+        SourceLine line = new ArraySourceLine("1z");
+
+        // when
+        for (int i = symbols.length() - 2; i >= 1; i--) {
+            line.insertAt(1, symbols.charAt(i));
+        }
+
+        // then
+        assertEquals(symbols, line.toString());
+
+    }
+
 }
