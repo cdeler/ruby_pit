@@ -2,7 +2,12 @@ package cdeler.ide;
 
 import javax.swing.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Ide extends JFrame {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Ide.class);
+
     private int windowWidth;
     private int windowHeight;
     private String iconPath;
@@ -15,6 +20,8 @@ public class Ide extends JFrame {
         this.windowTitle = windowTitle;
 
         initialize();
+
+        LOGGER.info("Ide is initialized");
     }
 
     private void initialize() {

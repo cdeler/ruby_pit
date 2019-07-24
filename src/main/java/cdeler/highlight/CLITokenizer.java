@@ -7,13 +7,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +46,14 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
 
         setExecutableBit(executableFileName, treeSitterPath);
         this.executablePath = treeSitterPath.toAbsolutePath() + "/" + executableFileName;
+
+        LOGGER.info("Created " + this);
+    }
+
+    public String toString() {
+        return getClass().getName() + "("
+                + this.executablePath + ", " + this.treeSitterPath + ", " + this.treeSitterRubyPath +
+                ")";
     }
 
     private static void setExecutableBit(String executableName, Path executableDirectory) {
@@ -76,17 +89,32 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
 
     private static Optional<Path> unpackResourceToTempDir(String resourceName) {
         try {
-            URL treeSitterDirURL = CLITokenizer.class.getResource(resourceName);
-            File treeSitterDir = new File(
-                    String.valueOf(treeSitterDirURL).substring("file:".length())
-            );
-
             Path directoryToUnpack = Files.createTempDirectory(resourceName.substring(1));
 
-            FileUtils.copyDirectory(treeSitterDir, directoryToUnpack.toFile());
+            var uri = CLITokenizer.class.getResource(resourceName).toURI();
+
+            if (uri.getScheme().contains("jar")) {
+                try (FileSystem jarFS = FileSystems.newFileSystem(uri, Collections.emptyMap(), null)) {
+                    Path packedDirectory = jarFS.getPath(resourceName.substring(1));
+
+                    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(packedDirectory)) {
+                        for (Path filePath : directoryStream) {
+                            var newFilePath = Paths.get(
+                                    directoryToUnpack.toString(),
+                                    filePath.toString().substring(resourceName.length()));
+
+                            Files.copy(filePath, newFilePath);
+                        }
+                    }
+
+                }
+            } else {
+                File inputDirectory = new File(uri);
+                FileUtils.copyDirectory(inputDirectory, directoryToUnpack.toFile());
+            }
 
             return Optional.of(directoryToUnpack);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             LOGGER.error("Unable to unpack " + resourceName, e);
         }
 
