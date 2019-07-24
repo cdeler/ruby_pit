@@ -7,11 +7,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
+import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +29,102 @@ import org.slf4j.LoggerFactory;
 public class CLITokenizer extends AbstractTokenizer<List<String>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CLITokenizer.class);
     private final String executablePath;
+    private final Path treeSitterPath;
+    private final Path treeSitterRubyPath;
 
-    public CLITokenizer(String executablePath) {
-        this.executablePath = executablePath;
+    public CLITokenizer(String executableFileName, String treeSitterResourcePath, String treeSitterRubyResourcePath) {
+
+        this.treeSitterPath = unpackResourceToTempDir(treeSitterResourcePath).orElseThrow();
+        this.treeSitterRubyPath = unpackResourceToTempDir(treeSitterRubyResourcePath).orElseThrow();
+
+        recursiveDeleteOnShutdownHook(this.treeSitterPath, this.treeSitterRubyPath);
+
+        setExecutableBit(executableFileName, treeSitterPath);
+        this.executablePath = treeSitterPath.toAbsolutePath() + "/" + executableFileName;
+    }
+
+    private static void setExecutableBit(String executableName, Path executableDirectory) {
+        try {
+            Files.walkFileTree(executableDirectory, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file,
+                                                 @SuppressWarnings("unused") BasicFileAttributes attrs)
+                        throws IOException {
+                    Set<PosixFilePermission> perms = new HashSet<>();
+                    perms.add(PosixFilePermission.OWNER_READ);
+                    perms.add(PosixFilePermission.OWNER_WRITE);
+                    perms.add(PosixFilePermission.OWNER_EXECUTE);
+                    Files.setPosixFilePermissions(file, perms);
+
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException e)
+                        throws IOException {
+                    if (e == null) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    // directory iteration failed
+                    throw e;
+                }
+            });
+        } catch (IOException e) {
+            LOGGER.error("Unable to set +x bit to file" + executableName, e);
+        }
+    }
+
+    private static Optional<Path> unpackResourceToTempDir(String resourceName) {
+        try {
+            URL treeSitterDirURL = CLITokenizer.class.getResource(resourceName);
+            File treeSitterDir = new File(
+                    String.valueOf(treeSitterDirURL).substring("file:".length())
+            );
+
+            Path directoryToUnpack = Files.createTempDirectory(resourceName.substring(1));
+
+            FileUtils.copyDirectory(treeSitterDir, directoryToUnpack.toFile());
+
+            return Optional.of(directoryToUnpack);
+        } catch (IOException e) {
+            LOGGER.error("Unable to unpack " + resourceName, e);
+        }
+
+        return Optional.empty();
+    }
+
+    // https://stackoverflow.com/questions/15022219/does-files-createtempdirectory-remove-the-directory-after-jvm
+    // -exits-normally
+    private static void recursiveDeleteOnShutdownHook(final Path... directories) {
+        Runtime.getRuntime().addShutdownHook(new Thread(
+                () -> {
+                    try {
+                        for (var directory : directories) {
+                            Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+                                @Override
+                                public FileVisitResult visitFile(Path file,
+                                                                 @SuppressWarnings("unused") BasicFileAttributes attrs)
+                                        throws IOException {
+                                    Files.delete(file);
+                                    return FileVisitResult.CONTINUE;
+                                }
+
+                                @Override
+                                public FileVisitResult postVisitDirectory(Path dir, IOException e)
+                                        throws IOException {
+                                    if (e == null) {
+                                        Files.delete(dir);
+                                        return FileVisitResult.CONTINUE;
+                                    }
+                                    // directory iteration failed
+                                    throw e;
+                                }
+                            });
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to delete temp directories", e);
+                    }
+                }));
     }
 
     @Override
@@ -59,15 +161,12 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
         final ProcessBuilder processBuilder =
                 new ProcessBuilder(executablePath, "parse", sourceFile.getAbsolutePath());
 
+        processBuilder.directory(treeSitterRubyPath.toFile());
+
         final Process process = processBuilder.start();
 
         try (BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             result = (List<String>) IOUtils.readLines(in);
-
-            process.wait();
-        } catch (InterruptedException ex) {
-            LOGGER.error("Subprocess spawn error", ex);
-            result = Collections.emptyList();
         }
 
         return result;
@@ -80,5 +179,4 @@ public class CLITokenizer extends AbstractTokenizer<List<String>> {
 
         return sourceFile;
     }
-
 }

@@ -15,7 +15,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer {
     protected abstract List<Token> build(T data);
 
     @Override
-    public List<Token> harvest(InputStream is) {
+    final public List<Token> harvest(InputStream is) {
         try {
             T intermediateData = feed(is);
             return build(intermediateData);

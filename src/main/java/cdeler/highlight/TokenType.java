@@ -1,20 +1,26 @@
 package cdeler.highlight;
 
 public enum TokenType {
-    KEYWORD,
-    IDENTIFIER,
-    STRING,
-    WORD,
-    UNKNOWN_TYPE;
+    keyword,
+    identifier,
+    string,
+    word,
+    symbol,
+    constant,
+    unknown;
 
     public static TokenType getEnum(String val) {
         switch (val) {
             case "identifier":
-                return TokenType.IDENTIFIER;
+                return TokenType.identifier;
             case "string":
-                return TokenType.STRING;
+                return TokenType.string;
+            case "constant":
+                return TokenType.constant;
+            case "symbol":
+                return TokenType.symbol;
             default:
-                return TokenType.UNKNOWN_TYPE;
+                return TokenType.unknown;
         }
     }
 }

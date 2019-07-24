@@ -21,7 +21,7 @@ public class SourceToken implements Token {
         if (matcher.matches()) {
             var tokenType = TokenType.getEnum(matcher.group(1));
 
-            if (tokenType != TokenType.UNKNOWN_TYPE) {
+            if (tokenType != TokenType.unknown) {
                 int beginLine = Integer.valueOf(matcher.group(2));
                 int beginColumn = Integer.valueOf(matcher.group(3));
                 int endLine = Integer.valueOf(matcher.group(4));

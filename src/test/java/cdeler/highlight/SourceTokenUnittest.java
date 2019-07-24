@@ -20,7 +20,7 @@ public class SourceTokenUnittest {
 
         var token = optionalToken.get();
 
-        assertEquals(TokenType.IDENTIFIER, token.getTokenType());
+        assertEquals(TokenType.identifier, token.getTokenType());
         assertEquals(1, token.getLocation().beginLine);
         assertEquals(2, token.getLocation().beginColumn);
         assertEquals(3, token.getLocation().endLine);
