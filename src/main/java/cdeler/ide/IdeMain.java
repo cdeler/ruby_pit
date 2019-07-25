@@ -9,9 +9,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class IdeMain extends JFrame {
     public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            ApplicationContext context = new ClassPathXmlApplicationContext("/app-context.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("/app-context.xml");
 
+        EventQueue.invokeLater(() -> {
             Ide ide = (Ide) context.getBean("main_application");
 
             ide.setVisible(true);

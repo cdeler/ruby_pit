@@ -14,6 +14,9 @@
         <constructor-arg index="1" value="600"/>
         <constructor-arg index="2" value="/icons8-ruby-programming-language-64.png"/>
         <constructor-arg index="3" value="Ruby Pit"/>
+        <constructor-arg index="4" ref="event_thread"/>
     </bean>
+
+    <bean id="event_thread" class="cdeler.core.EventThread"/>
 
 </beans>
