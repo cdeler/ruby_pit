@@ -7,7 +7,6 @@ import java.util.Scanner;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Element;
 import javax.swing.text.Utilities;
 
 import org.slf4j.Logger;
@@ -35,30 +34,29 @@ public class LineNumberedTextArea extends JTextArea {
             int caretPosition = textArea.getCaretPosition();
             int caretLine = textArea.getLineOfOffset(caretPosition);
             int textAreaLineNumber = -1;
-            int highlitedLineNumber = -1;
+            int highlightLineNumber = -1;
 
             while (scanner.hasNext()) {
                 var currentLine = scanner.next();
 
-                highlitedLineNumber++;
+                highlightLineNumber++;
                 if (!currentLine.isBlank())
                     textAreaLineNumber++;
 
                 if (textAreaLineNumber == caretLine) {
-                    int beginHighlightedOffset = getLineStartOffset(highlitedLineNumber);
-                    int endHighlightedOffset = getLineEndOffset(highlitedLineNumber);
+                    int beginHighlightedOffset = getLineStartOffset(highlightLineNumber);
 
                     while (scanner.hasNext()) {
                         var nextLine = scanner.next();
 
                         if (nextLine.isBlank()) {
-                            highlitedLineNumber++;
+                            highlightLineNumber++;
                         } else {
                             break;
                         }
                     }
 
-                    endHighlightedOffset = getLineEndOffset(highlitedLineNumber);
+                    int endHighlightedOffset = getLineEndOffset(highlightLineNumber);
                     getHighlighter().removeAllHighlights();
                     getHighlighter().addHighlight(beginHighlightedOffset, endHighlightedOffset,
                             new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
@@ -93,7 +91,7 @@ public class LineNumberedTextArea extends JTextArea {
             if (endOffset >= 1) {
                 int prevLineNumber = -1;
                 while (rowStartOffset <= endOffset) {
-                    int lineNumber = getTextLineNumber(rowStartOffset);
+                    int lineNumber = textArea.getLineOfOffset(rowStartOffset) + 1;
 
                     if (lineNumber != prevLineNumber) {
                         lineNumbersTextBuilder.append(String.format(format, lineNumber)).append(System.lineSeparator());
@@ -111,13 +109,6 @@ public class LineNumberedTextArea extends JTextArea {
         }
 
         return lineNumbersTextBuilder.toString();
-    }
-
-    private int getTextLineNumber(int rowStartOffset) {
-        Element root = textArea.getDocument().getDefaultRootElement();
-        int index = root.getElementIndex(rowStartOffset);
-
-        return index + 1;
     }
 
     private int getWidthInSymbols() {
