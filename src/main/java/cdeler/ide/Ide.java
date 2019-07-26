@@ -19,6 +19,7 @@ import cdeler.core.FontLoader;
 import cdeler.core.UIEvent;
 import cdeler.core.UIEventType;
 
+
 // created using https://stackoverflow.com/questions/36384683/highlighter-highlights-all-the-textarea-instead-of-a
 // -specific-word-and-its-occur
 public class Ide extends JFrame implements EventProducer {
@@ -29,7 +30,7 @@ public class Ide extends JFrame implements EventProducer {
     private String iconPath;
     private String windowTitle;
     private final JTextArea textArea;
-    private final LineNumberingTextArea lineNumbers;
+    private final LineNumberedTextPane lineNumbers;
     private final EventThread eventThread;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
@@ -39,14 +40,14 @@ public class Ide extends JFrame implements EventProducer {
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
         this.textArea = new JTextArea();
-        this.lineNumbers = new LineNumberingTextArea(textArea);
+        this.lineNumbers = new LineNumberedTextPane(textArea);
         this.eventThread = eventThread;
 
         initialize();
 
-        this.eventThread.addConsumers(getEventList());
+        this.eventThread.addConsumers(getLineNumbersEventList());
 
-        new Thread(this.eventThread, "ui_events_thread").start();
+        new Thread(this.eventThread, "line_numbers_event_thread").start();
 
         LOGGER.info("Ide is initialized");
     }
@@ -83,6 +84,8 @@ public class Ide extends JFrame implements EventProducer {
             }
         });
 
+        textArea.addCaretListener(caretEvent -> eventThread.fire(new UIEvent(UIEventType.CARET_UPDATE)));
+
         var scrollPane = new JScrollPane(textArea);
         scrollPane.setRowHeaderView(lineNumbers);
 
@@ -106,7 +109,7 @@ public class Ide extends JFrame implements EventProducer {
     }
 
     @Override
-    public Map<UIEventType, Function<List<UIEvent>, Void>> getEventList() {
+    public Map<UIEventType, Function<List<UIEvent>, Void>> getLineNumbersEventList() {
         Map<UIEventType, Function<List<UIEvent>, Void>> result = new HashMap<>();
 
         result.put(UIEventType.CHANGE_UPDATE, uiEvent -> {
@@ -119,6 +122,10 @@ public class Ide extends JFrame implements EventProducer {
         });
         result.put(UIEventType.REMOVE_UPDATE, uiEvent -> {
             lineNumbers.updateLineNumbers();
+            return null;
+        });
+        result.put(UIEventType.CARET_UPDATE, uiEvents -> {
+            lineNumbers.highlightCaretPosition();
             return null;
         });
 
