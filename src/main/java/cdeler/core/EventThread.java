@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 public class EventThread implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventThread.class);
-    private static final int HANDLED_EVENTS_THRESHOLD = 25;
-    private static final int DELAY_SIZE_MS = 50;
+    private static final int HANDLED_EVENTS_THRESHOLD = 75;
+    private static final int DELAY_SIZE_MS = 250;
 
     private final BlockingQueue<UIEvent> eventQueue;
     private final Map<UIEventType, Function<List<UIEvent>, Void>> consumers;

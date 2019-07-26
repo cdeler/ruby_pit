@@ -1,6 +1,8 @@
 package cdeler.ide;
 
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +32,7 @@ public class Ide extends JFrame implements EventProducer {
     private String iconPath;
     private String windowTitle;
     private final JTextArea textArea;
-    private final LineNumberedTextPane lineNumbers;
+    private final LineNumberedTextArea lineNumbers;
     private final EventThread eventThread;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
@@ -40,7 +42,7 @@ public class Ide extends JFrame implements EventProducer {
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
         this.textArea = new JTextArea();
-        this.lineNumbers = new LineNumberedTextPane(textArea);
+        this.lineNumbers = new LineNumberedTextArea(textArea);
         this.eventThread = eventThread;
 
         initialize();
@@ -90,6 +92,26 @@ public class Ide extends JFrame implements EventProducer {
         scrollPane.setRowHeaderView(lineNumbers);
 
         var panel = new JPanel(new BorderLayout());
+
+        panel.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent componentEvent) {
+                eventThread.fire(new UIEvent(UIEventType.WINDOW_RESIZE));
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent componentEvent) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent componentEvent) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent componentEvent) {
+            }
+        });
+
         panel.add(scrollPane);
 
         add(panel, BorderLayout.CENTER);
@@ -126,6 +148,10 @@ public class Ide extends JFrame implements EventProducer {
         });
         result.put(UIEventType.CARET_UPDATE, uiEvents -> {
             lineNumbers.highlightCaretPosition();
+            return null;
+        });
+        result.put(UIEventType.WINDOW_RESIZE, uiEvents -> {
+            lineNumbers.updateLineNumbers();
             return null;
         });
 

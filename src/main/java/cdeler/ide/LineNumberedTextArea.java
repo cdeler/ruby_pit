@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 
 import cdeler.core.FontLoader;
 
-public class LineNumberedTextPane extends JTextArea {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextPane.class);
+public class LineNumberedTextArea extends JTextArea {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
     private static final int MIN_SYMBOL_WIDTH = 3;
 
     private final JTextArea textArea;
 
-    public LineNumberedTextPane(JTextArea textArea) {
+    public LineNumberedTextArea(JTextArea textArea) {
         this.textArea = textArea;
         setBackground(Color.LIGHT_GRAY);
         setEditable(false);
@@ -34,33 +34,33 @@ public class LineNumberedTextPane extends JTextArea {
         try (Scanner scanner = new Scanner(text).useDelimiter(System.lineSeparator())) {
             int caretPosition = textArea.getCaretPosition();
             int caretLine = textArea.getLineOfOffset(caretPosition);
-            int currentComponentLineNumber = -1;
-            int toHighlightLineNumber = -1;
+            int textAreaLineNumber = -1;
+            int highlitedLineNumber = -1;
 
             while (scanner.hasNext()) {
                 var currentLine = scanner.next();
 
+                highlitedLineNumber++;
                 if (!currentLine.isBlank())
-                    currentComponentLineNumber++;
-                toHighlightLineNumber++;
+                    textAreaLineNumber++;
 
-                if (currentComponentLineNumber == caretLine) {
-                    int beginOffset = getLineStartOffset(toHighlightLineNumber);
-                    int endOffset = getLineEndOffset(toHighlightLineNumber);
+                if (textAreaLineNumber == caretLine) {
+                    int beginHighlightedOffset = getLineStartOffset(highlitedLineNumber);
+                    int endHighlightedOffset = getLineEndOffset(highlitedLineNumber);
 
                     while (scanner.hasNext()) {
                         var nextLine = scanner.next();
 
                         if (nextLine.isBlank()) {
-                            toHighlightLineNumber++;
+                            highlitedLineNumber++;
                         } else {
-                            endOffset = getLineEndOffset(toHighlightLineNumber);
-
                             break;
                         }
                     }
+
+                    endHighlightedOffset = getLineEndOffset(highlitedLineNumber);
                     getHighlighter().removeAllHighlights();
-                    getHighlighter().addHighlight(beginOffset, endOffset,
+                    getHighlighter().addHighlight(beginHighlightedOffset, endHighlightedOffset,
                             new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
 
                     return;
@@ -68,33 +68,7 @@ public class LineNumberedTextPane extends JTextArea {
 
             }
         } catch (BadLocationException e) {
-
         }
-
-        /*
-        try {
-
-
-            int caretPosition = textArea.getCaretPosition();
-
-            if (caretPosition >= 0) {
-                int caretLine = textArea.getLineOfOffset(caretPosition);
-
-                int caretLineBeginOffset = Utilities.getRowStart(textArea, caretPosition);
-                int caretLineEndOffset = Utilities.getRowEnd(textArea, caretPosition);
-
-                int lineWidthInSymbols = getWidthInSymbols() + System.lineSeparator().length();
-                int firstOffset = caretLineBeginOffset; //caretLine * lineWidthInSymbols;
-                int lastOffset = caretLineEndOffset; //(caretLine + 1) * lineWidthInSymbols;
-
-                getHighlighter().removeAllHighlights();
-                getHighlighter().addHighlight(firstOffset, lastOffset,
-                        new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
-            }
-
-        } catch (BadLocationException e) {
-            LOGGER.warn("Unable to highlightCaretPosition", e);
-        }*/
     }
 
     public void updateLineNumbers() {
@@ -119,7 +93,7 @@ public class LineNumberedTextPane extends JTextArea {
             if (endOffset >= 1) {
                 int prevLineNumber = -1;
                 while (rowStartOffset <= endOffset) {
-                    int lineNumber = getTextLineNumber(format, emptyLine, rowStartOffset);
+                    int lineNumber = getTextLineNumber(rowStartOffset);
 
                     if (lineNumber != prevLineNumber) {
                         lineNumbersTextBuilder.append(String.format(format, lineNumber)).append(System.lineSeparator());
@@ -128,8 +102,6 @@ public class LineNumberedTextPane extends JTextArea {
                     }
                     prevLineNumber = lineNumber;
 
-                    // String lineNumber = getTextLineNumber(format, emptyLine, rowStartOffset);
-                    // lineNumbersTextBuilder.append(lineNumber).append(System.lineSeparator());
                     rowStartOffset = Utilities.getRowEnd(textArea, rowStartOffset) + 1;
                 }
             }
@@ -141,18 +113,11 @@ public class LineNumberedTextPane extends JTextArea {
         return lineNumbersTextBuilder.toString();
     }
 
-    private int getTextLineNumber(String format, String emptyLineValue, int rowStartOffset) {
+    private int getTextLineNumber(int rowStartOffset) {
         Element root = textArea.getDocument().getDefaultRootElement();
         int index = root.getElementIndex(rowStartOffset);
-        Element line = root.getElement(index);
 
         return index + 1;
-        /*
-        if (line.getStartOffset() == rowStartOffset) {
-            return String.format(format, index + 1);
-        } else {
-            return emptyLineValue;
-        }*/
     }
 
     private int getWidthInSymbols() {
