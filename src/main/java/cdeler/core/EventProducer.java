@@ -5,5 +5,5 @@ import java.util.Map;
 import java.util.function.Function;
 
 public interface EventProducer {
-    Map<UIEventType, Function<List<UIEvent>, Void>> getEventList();
+    Map<UIEventType, Function<List<UIEvent>, Void>> getLineNumbersEventList();
 }
