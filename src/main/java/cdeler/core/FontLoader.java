@@ -24,6 +24,5 @@ public class FontLoader {
         }
 
         return new Font("Serif", Font.PLAIN, fontSize);
-
     }
 }

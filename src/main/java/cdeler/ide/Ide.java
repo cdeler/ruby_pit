@@ -66,6 +66,66 @@ public class Ide extends JFrame implements EventProducer {
 
         initializeTextArea();
 
+
+        var scrollPane = new JScrollPane(textArea);
+        scrollPane.setRowHeaderView(lineNumbers);
+
+        var textPanel = new JPanel(new BorderLayout());
+
+        textPanel.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent componentEvent) {
+                eventThread.fire(new UIEvent(UIEventType.WINDOW_RESIZE));
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent componentEvent) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent componentEvent) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent componentEvent) {
+            }
+        });
+
+
+        var openButton = new JButton("\uD83D\uDCC2");
+        openButton.addActionListener(actionEvent -> {
+            LOGGER.error("Open button pressed");
+        });
+
+        var saveButton = new JButton("\uD83D\uDCBE");
+        saveButton.addActionListener(actionEvent -> {
+            LOGGER.error("Save button pressed");
+        });
+
+        var topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
+        topPanel.add(openButton);
+        topPanel.add(saveButton);
+
+        textPanel.add(scrollPane);
+
+        add(topPanel, BorderLayout.NORTH);
+        add(textPanel, BorderLayout.CENTER);
+
+        lineNumbers.updateLineNumbers();
+        pack();
+    }
+
+
+    private void initializeTextArea() {
+        textArea.setColumns(80);
+        textArea.setRows(30);
+        textArea.setLineWrap(true);
+        textArea.setEditable(true);
+        textArea.setWrapStyleWord(true);
+
+        textArea.setFont(FontLoader.load("iosevka-regular", 20));
+
         textArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
@@ -87,47 +147,6 @@ public class Ide extends JFrame implements EventProducer {
         });
 
         textArea.addCaretListener(caretEvent -> eventThread.fire(new UIEvent(UIEventType.CARET_UPDATE)));
-
-        var scrollPane = new JScrollPane(textArea);
-        scrollPane.setRowHeaderView(lineNumbers);
-
-        var panel = new JPanel(new BorderLayout());
-
-        panel.addComponentListener(new ComponentListener() {
-            @Override
-            public void componentResized(ComponentEvent componentEvent) {
-                eventThread.fire(new UIEvent(UIEventType.WINDOW_RESIZE));
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent componentEvent) {
-            }
-
-            @Override
-            public void componentShown(ComponentEvent componentEvent) {
-            }
-
-            @Override
-            public void componentHidden(ComponentEvent componentEvent) {
-            }
-        });
-
-        panel.add(scrollPane);
-
-        add(panel, BorderLayout.CENTER);
-
-        lineNumbers.updateLineNumbers();
-        pack();
-    }
-
-    private void initializeTextArea() {
-        textArea.setColumns(80);
-        textArea.setRows(60);
-        textArea.setLineWrap(true);
-        textArea.setEditable(true);
-        textArea.setWrapStyleWord(true);
-
-        textArea.setFont(FontLoader.load("iosevka-regular", 20));
     }
 
     @Override
