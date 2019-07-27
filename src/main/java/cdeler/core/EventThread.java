@@ -68,7 +68,9 @@ public class EventThread implements Runnable {
                     continue;
                 }
 
-                Thread.sleep(DELAY_SIZE_MS);
+                if (eventQueue.isEmpty()) {
+                    Thread.sleep(DELAY_SIZE_MS);
+                }
             } catch (InterruptedException e) {
                 LOGGER.error("Something went wrong", e);
                 // ignore it...

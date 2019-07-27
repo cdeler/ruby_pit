@@ -1,13 +1,10 @@
-package core;
+package cdeler.core;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
-
-import cdeler.core.IDEException;
-import cdeler.core.SparseArraySourceStorage;
 
 import static org.junit.Assert.assertEquals;
 

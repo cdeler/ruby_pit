@@ -1,9 +1,6 @@
-package core;
+package cdeler.core;
 
 import org.junit.Test;
-
-import cdeler.core.ArraySourceLine;
-import cdeler.core.SourceLine;
 
 import static org.junit.Assert.assertEquals;
 

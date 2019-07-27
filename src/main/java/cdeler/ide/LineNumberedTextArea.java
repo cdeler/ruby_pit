@@ -1,7 +1,8 @@
 package cdeler.ide;
 
 import java.awt.*;
-import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.*;
@@ -13,15 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cdeler.core.FontLoader;
+import cdeler.core.StringUtils;
 
 public class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
     private static final int MIN_SYMBOL_WIDTH = 3;
 
     private final JTextArea textArea;
+    private final List<Integer> lineNumbers;
 
     public LineNumberedTextArea(JTextArea textArea) {
         this.textArea = textArea;
+        this.lineNumbers = new ArrayList<>();
         setBackground(Color.LIGHT_GRAY);
         setEditable(false);
         setFont(FontLoader.load("iosevka-regular", 20));
@@ -70,36 +74,28 @@ public class LineNumberedTextArea extends JTextArea {
     }
 
     public void updateLineNumbers() {
-        String lineNumbersText = getLineNumbersText();
-        setText(lineNumbersText);
+        this.lineNumbers.clear();
+        this.lineNumbers.addAll(getLineNumbersData());
+
+        setText(StringUtils.formatLineNumbers(this.lineNumbers, MIN_SYMBOL_WIDTH));
         highlightCaretPosition();
     }
 
     // TODO sync issue when textArea is changing in the loop
-    private String getLineNumbersText() {
+    private List<Integer> getLineNumbersData() {
         LOGGER.debug("Trace getLineNumbersText()");
 
-        StringBuilder lineNumbersTextBuilder = new StringBuilder();
-
-        String format = "%" + getWidthInSymbols() + "d";
-        String emptyLine = CharBuffer.allocate(getWidthInSymbols()).toString().replace('\0', ' ');
+        List<Integer> lineNumbersData = new ArrayList<>(lineNumbers.size());
 
         try {
             int rowStartOffset = Utilities.getRowStart(textArea, 0);
             int endOffset = textArea.getLineEndOffset(textArea.getLineCount() - 1);
 
             if (endOffset >= 1) {
-                int prevLineNumber = -1;
                 while (rowStartOffset <= endOffset) {
                     int lineNumber = textArea.getLineOfOffset(rowStartOffset) + 1;
 
-                    if (lineNumber != prevLineNumber) {
-                        lineNumbersTextBuilder.append(String.format(format, lineNumber)).append(System.lineSeparator());
-                    } else {
-                        lineNumbersTextBuilder.append(emptyLine).append(System.lineSeparator());
-                    }
-                    prevLineNumber = lineNumber;
-
+                    lineNumbersData.add(lineNumber);
                     rowStartOffset = Utilities.getRowEnd(textArea, rowStartOffset) + 1;
                 }
             }
@@ -108,10 +104,6 @@ public class LineNumberedTextArea extends JTextArea {
             // rowStartOffset becomes invalid when we speedly delete text lines from textArea
         }
 
-        return lineNumbersTextBuilder.toString();
-    }
-
-    private int getWidthInSymbols() {
-        return Math.max((int) Math.ceil(Math.log10(textArea.getLineCount())), MIN_SYMBOL_WIDTH);
+        return lineNumbersData;
     }
 }

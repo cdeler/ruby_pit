@@ -130,19 +130,19 @@ public class Ide extends JFrame implements EventProducer {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("insertUpdate");
-                eventThread.fire(new UIEvent(UIEventType.INSERT_UPDATE));
+                eventThread.fire(new UIEvent(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
 
             @Override
             public void removeUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("removeUpdate");
-                eventThread.fire(new UIEvent(UIEventType.REMOVE_UPDATE));
+                eventThread.fire(new UIEvent(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
 
             @Override
             public void changedUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("changedUpdate");
-                eventThread.fire(new UIEvent(UIEventType.CHANGE_UPDATE));
+                eventThread.fire(new UIEvent(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
         });
 
@@ -153,15 +153,7 @@ public class Ide extends JFrame implements EventProducer {
     public Map<UIEventType, Function<List<UIEvent>, Void>> getLineNumbersEventList() {
         Map<UIEventType, Function<List<UIEvent>, Void>> result = new HashMap<>();
 
-        result.put(UIEventType.CHANGE_UPDATE, uiEvent -> {
-            lineNumbers.updateLineNumbers();
-            return null;
-        });
-        result.put(UIEventType.INSERT_UPDATE, uiEvent -> {
-            lineNumbers.updateLineNumbers();
-            return null;
-        });
-        result.put(UIEventType.REMOVE_UPDATE, uiEvent -> {
+        result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
             return null;
         });
