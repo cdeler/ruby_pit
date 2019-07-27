@@ -3,7 +3,6 @@ package cdeler.ide;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -14,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cdeler.core.FontLoader;
-import cdeler.core.StringUtils;
+import cdeler.core.UIUtils;
 
 public class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
@@ -32,52 +31,33 @@ public class LineNumberedTextArea extends JTextArea {
     }
 
     public synchronized void highlightCaretPosition() {
-        var text = getText();
+        if (lineNumbers.isEmpty()) {
+            return;
+        }
 
-        try (Scanner scanner = new Scanner(text).useDelimiter(System.lineSeparator())) {
+        try {
             int caretPosition = textArea.getCaretPosition();
             int caretLine = textArea.getLineOfOffset(caretPosition);
-            int textAreaLineNumber = -1;
-            int highlightLineNumber = -1;
 
-            while (scanner.hasNext()) {
-                var currentLine = scanner.next();
+            var highlightedArea = UIUtils.getHighlightedArea(lineNumbers, caretLine + 1);
 
-                highlightLineNumber++;
-                if (!currentLine.isBlank())
-                    textAreaLineNumber++;
+            getHighlighter().removeAllHighlights();
+            getHighlighter().addHighlight(
+                    getLineStartOffset(highlightedArea.first()),
+                    getLineEndOffset(highlightedArea.second()),
+                    new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
 
-                if (textAreaLineNumber == caretLine) {
-                    int beginHighlightedOffset = getLineStartOffset(highlightLineNumber);
-
-                    while (scanner.hasNext()) {
-                        var nextLine = scanner.next();
-
-                        if (nextLine.isBlank()) {
-                            highlightLineNumber++;
-                        } else {
-                            break;
-                        }
-                    }
-
-                    int endHighlightedOffset = getLineEndOffset(highlightLineNumber);
-                    getHighlighter().removeAllHighlights();
-                    getHighlighter().addHighlight(beginHighlightedOffset, endHighlightedOffset,
-                            new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
-
-                    return;
-                }
-
-            }
         } catch (BadLocationException e) {
+        } catch (IndexOutOfBoundsException e) {
+            LOGGER.error("Invalid highlight location", e);
         }
     }
 
-    public void updateLineNumbers() {
+    public synchronized void updateLineNumbers() {
         this.lineNumbers.clear();
         this.lineNumbers.addAll(getLineNumbersData());
 
-        setText(StringUtils.formatLineNumbers(this.lineNumbers, MIN_SYMBOL_WIDTH));
+        setText(UIUtils.formatLineNumbers(this.lineNumbers, MIN_SYMBOL_WIDTH));
         highlightCaretPosition();
     }
 

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class StringUtilsUnittest {
+public class UIUtilsUnittest {
     @Test
     public void testFormatNumber() {
         // given
@@ -31,7 +31,7 @@ public class StringUtilsUnittest {
             var number = arguments.get(0);
             var numPos = arguments.get(1);
 
-            return StringUtils.formatNumber(number, numPos);
+            return UIUtils.formatNumber(number, numPos);
         }).collect(Collectors.toList());
 
         // then
@@ -53,10 +53,52 @@ public class StringUtilsUnittest {
                 + "  5" + System.lineSeparator();
 
         // when
-        String actual = StringUtils.formatLineNumbers(arg, 3);
+        String actual = UIUtils.formatLineNumbers(arg, 3);
 
         // then
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void testForHighlightedAreaSmoke() {
+        // given
+        var lines = Arrays.asList(1, 2, 3, 4, 5);
+        var lookingFor = 2;
+        var expected = new Pair<>(1, 1);
+
+        // when
+        var actual = UIUtils.getHighlightedArea(lines, lookingFor);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+
+    @Test
+    public void testForHighlightedAreaWithRepeats() {
+        // given
+        var lines = Arrays.asList(1, 1, 2, 3, 4, 4, 4, 4, 5);
+        var lookingFor = 4;
+        var expected = new Pair<>(4, 7);
+
+        // when
+        var actual = UIUtils.getHighlightedArea(lines, lookingFor);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testForHighlightedAreaOneLine() {
+        // given
+        var lines = Arrays.asList(1);
+        var lookingFor = 1;
+        var expected = new Pair<>(0, 0);
+
+        // when
+        var actual = UIUtils.getHighlightedArea(lines, lookingFor);
+
+        // then
+        assertEquals(expected, actual);
     }
 }
