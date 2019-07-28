@@ -13,4 +13,6 @@
 
     <bean id="line_numbers_event_thread" class="cdeler.core.EventThread"/>
 
+    <bean id="jni_tokenizer" class="cdeler.highlight.JNITokenizer"/>
+
 </beans>

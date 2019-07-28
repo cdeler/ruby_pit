@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'cpp'
 }
 
 group 'cdeler.ide'
@@ -11,9 +12,37 @@ repositories {
     mavenCentral()
 }
 
+model {
+    platforms {
+        x64 {
+            architecture "x64"
+        }
+    }
+    components {
+        r_tree_sitter(NativeLibrarySpec) {
+            binaries.configure {
+                def compileTask = compileTask.get()
+                compileTask.source.from fileTree(dir: "src/main/c/ruby_tree_sitter", include: "**/*.c")
+
+                if (targetPlatform.operatingSystem.linux) {
+                    cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
+                    cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include/linux"
+                    cCompiler.args '-D_FILE_OFFSET_BITS=64'
+                } else if (targetPlatform.operatingSystem.windows) {
+                    cCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
+                    cCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include/win32"
+                }
+            }
+            binaries.withType(StaticLibraryBinarySpec) {
+                buildable = false
+            }
+        }
+    }
+}
+
 // create a single Jar with all dependencies
 // from https://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
-task fatJar(type: Jar) {
+task fatJar(type: Jar, dependsOn: ['r_tree_sitterSharedLibrary']) {
     manifest {
         attributes 'Implementation-Title': 'RubyPit IDE',
                 'Implementation-Version': version,
@@ -31,5 +60,9 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
     compile group: 'org.springframework', name: 'spring-core', version: '5.1.8.RELEASE'
     compile group: 'org.springframework', name: 'spring-context', version: '5.1.8.RELEASE'
+    compile group: 'org.scijava', name: 'native-lib-loader', version: '2.3.4'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'}
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+}
+
