@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'cpp'
+    id 'c'
 }
 
 group 'cdeler.ide'
@@ -20,17 +20,31 @@ model {
     }
     components {
         r_tree_sitter(NativeLibrarySpec) {
-            binaries.configure {
-                def compileTask = compileTask.get()
-                compileTask.source.from fileTree(dir: "src/main/c/ruby_tree_sitter", include: "**/*.c")
+            sources.c {
+                source {
+                    srcDir "$projectDir/src/main/c/";
 
+                    include '**/tree-sitter-ruby.c', '**/tree-sitter-ruby/src/parser.c'
+                }
+            }
+
+            binaries.all {
                 if (targetPlatform.operatingSystem.linux) {
                     cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
                     cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include/linux"
+                    cCompiler.args '-I', "${projectDir}/src/main/c/ruby-parser"
+                    cCompiler.args '-I', "${projectDir}/src/main/c/tree-sitter/lib/include"
+
                     cCompiler.args '-D_FILE_OFFSET_BITS=64'
                 } else if (targetPlatform.operatingSystem.windows) {
                     cCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
                     cCompiler.args "-I${org.gradle.internal.jvm.Jvm.current().javaHome}/include/win32"
+                    cCompiler.args "-I${projectDir}/src/main/c/ruby-parser"
+                    cCompiler.args "-I${projectDir}/src/main/c/tree-sitter/lib/include"
+                    cCompiler.args "/MT"
+
+                    //linker.args '/NODEFAULTLIB'
+                    linker.args "${projectDir}/src/main/c/ruby-parser/tree-sitter.lib"
                 }
             }
             binaries.withType(StaticLibraryBinarySpec) {
@@ -40,9 +54,34 @@ model {
     }
 }
 
+
+task prebuildTreesitterLibrary(type: Exec) {
+    workingDir "$projectDir/src/main/c/tree-sitter"
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        commandLine 'cmd', '/c', 'cargo', 'build', '--release'
+    } else {
+        commandLine 'sh', '-c', 'cargo', 'build', '--release'
+    }
+}
+
+task copyTreesitterRubyGrammar(type: Copy) {
+    from("$projectDir/src/main/c/tree-sitter-ruby")
+    into("$buildDir/resources/main/tree-sitter/")
+}
+
+task copyPrebuildTreesitterBinary(type: Copy, dependsOn: ['prebuildTreesitterLibrary']) {
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        from("$projectDir/src/main/c/tree-sitter/target/release/tree-sitter.exe")
+    } else {
+        from("$projectDir/src/main/c/tree-sitter/target/release/tree-sitter")
+    }
+
+    into("$buildDir/resources/main/tree-sitter/")
+}
+
 // create a single Jar with all dependencies
 // from https://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
-task fatJar(type: Jar, dependsOn: ['r_tree_sitterSharedLibrary']) {
+task fatJar(type: Jar, dependsOn: ['copyTreesitterRubyGrammar', 'copyPrebuildTreesitterBinary']) {
     manifest {
         attributes 'Implementation-Title': 'RubyPit IDE',
                 'Implementation-Version': version,
