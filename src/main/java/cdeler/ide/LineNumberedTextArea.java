@@ -41,13 +41,15 @@ public class LineNumberedTextArea extends JTextArea {
 
             var highlightedArea = UIUtils.getHighlightedArea(lineNumbers, caretLine + 1);
 
-            getHighlighter().removeAllHighlights();
-            getHighlighter().addHighlight(
-                    getLineStartOffset(highlightedArea.first()),
-                    getLineEndOffset(highlightedArea.second()),
-                    new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
-
+            if (highlightedArea.isPresent()) {
+                getHighlighter().removeAllHighlights();
+                getHighlighter().addHighlight(
+                        getLineStartOffset(highlightedArea.get().first()),
+                        getLineEndOffset(highlightedArea.get().second()),
+                        new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
+            }
         } catch (BadLocationException e) {
+            LOGGER.error("Invalid caret position", e);
         } catch (IndexOutOfBoundsException e) {
             LOGGER.error("Invalid highlight location", e);
         }
@@ -58,7 +60,6 @@ public class LineNumberedTextArea extends JTextArea {
         this.lineNumbers.addAll(getLineNumbersData());
 
         setText(UIUtils.formatLineNumbers(this.lineNumbers, MIN_SYMBOL_WIDTH));
-        highlightCaretPosition();
     }
 
     // TODO sync issue when textArea is changing in the loop

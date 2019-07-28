@@ -2,6 +2,7 @@ package cdeler.core;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class UIUtils {
     private UIUtils() {
@@ -37,25 +38,30 @@ public class UIUtils {
         return sb.toString();
     }
 
-    public static Pair<Integer> getHighlightedArea(List<Integer> lineNumbers, int caretLine) {
+    public static Optional<Pair<Integer>> getHighlightedArea(List<Integer> lineNumbers, int caretLine) {
         int startHighlightLinePosition = Arrays.binarySearch(lineNumbers.toArray(), caretLine);
-        if (lineNumbers.get(startHighlightLinePosition).equals(caretLine)) {
-            while (startHighlightLinePosition > 0) {
-                if (lineNumbers.get(startHighlightLinePosition).equals(lineNumbers.get(startHighlightLinePosition - 1))) {
-                    startHighlightLinePosition--;
-                } else {
-                    break;
+
+        if (0 <= startHighlightLinePosition && startHighlightLinePosition < lineNumbers.size()) {
+            if (lineNumbers.get(startHighlightLinePosition).equals(caretLine)) {
+                while (startHighlightLinePosition > 0) {
+                    if (lineNumbers.get(startHighlightLinePosition).equals(lineNumbers.get(startHighlightLinePosition - 1))) {
+                        startHighlightLinePosition--;
+                    } else {
+                        break;
+                    }
                 }
             }
+
+            int endHighlightLinePosition = startHighlightLinePosition;
+
+            while (endHighlightLinePosition < lineNumbers.size() - 1 && lineNumbers.get(endHighlightLinePosition + 1).equals(lineNumbers.get(endHighlightLinePosition))) {
+                endHighlightLinePosition++;
+            }
+
+            return Optional.of(new Pair<>(startHighlightLinePosition, endHighlightLinePosition));
         }
 
-        int endHighlightLinePosition = startHighlightLinePosition;
-
-        while (endHighlightLinePosition < lineNumbers.size() - 1 && lineNumbers.get(endHighlightLinePosition + 1).equals(lineNumbers.get(endHighlightLinePosition))) {
-            endHighlightLinePosition++;
-        }
-
-        return new Pair<>(startHighlightLinePosition, endHighlightLinePosition);
+        return Optional.empty();
     }
 
     // algorithm was taken from boost hash_combine (0x9e3779b9 also came from the boost)

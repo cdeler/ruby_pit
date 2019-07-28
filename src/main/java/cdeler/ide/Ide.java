@@ -45,7 +45,7 @@ public class Ide extends JFrame implements EventProducer {
         this.lineNumbers = new LineNumberedTextArea(textArea);
         this.eventThread = eventThread;
 
-        initialize();
+        uiInitialize();
 
         this.eventThread.addConsumers(getLineNumbersEventList());
 
@@ -54,7 +54,7 @@ public class Ide extends JFrame implements EventProducer {
         LOGGER.info("Ide is initialized");
     }
 
-    private void initialize() {
+    private void uiInitialize() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         setTitle(windowTitle);
@@ -65,7 +65,6 @@ public class Ide extends JFrame implements EventProducer {
         setIconImage(webIcon.getImage());
 
         initializeTextArea();
-
 
         var scrollPane = new JScrollPane(textArea);
         scrollPane.setRowHeaderView(lineNumbers);
@@ -116,7 +115,6 @@ public class Ide extends JFrame implements EventProducer {
         pack();
     }
 
-
     private void initializeTextArea() {
         textArea.setColumns(80);
         textArea.setRows(30);
@@ -155,6 +153,7 @@ public class Ide extends JFrame implements EventProducer {
 
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
+            lineNumbers.highlightCaretPosition();
             return null;
         });
         result.put(UIEventType.CARET_UPDATE, uiEvents -> {
@@ -163,6 +162,12 @@ public class Ide extends JFrame implements EventProducer {
         });
         result.put(UIEventType.WINDOW_RESIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
+            lineNumbers.highlightCaretPosition();
+            return null;
+        });
+        result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
+            lineNumbers.updateLineNumbers();
+            lineNumbers.highlightCaretPosition();
             return null;
         });
 

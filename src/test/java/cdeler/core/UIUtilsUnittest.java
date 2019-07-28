@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 public class UIUtilsUnittest {
     @Test
@@ -70,7 +71,8 @@ public class UIUtilsUnittest {
         var actual = UIUtils.getHighlightedArea(lines, lookingFor);
 
         // then
-        assertEquals(expected, actual);
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
 
@@ -85,7 +87,8 @@ public class UIUtilsUnittest {
         var actual = UIUtils.getHighlightedArea(lines, lookingFor);
 
         // then
-        assertEquals(expected, actual);
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
     @Test
@@ -99,6 +102,7 @@ public class UIUtilsUnittest {
         var actual = UIUtils.getHighlightedArea(lines, lookingFor);
 
         // then
-        assertEquals(expected, actual);
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 }
