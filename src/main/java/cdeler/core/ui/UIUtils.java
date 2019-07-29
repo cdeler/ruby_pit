@@ -1,8 +1,10 @@
-package cdeler.core;
+package cdeler.core.ui;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import cdeler.core.Pair;
 
 public class UIUtils {
     private UIUtils() {

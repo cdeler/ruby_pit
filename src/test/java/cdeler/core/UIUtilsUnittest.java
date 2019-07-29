@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
+import cdeler.core.ui.UIUtils;
+
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 

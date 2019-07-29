@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cdeler.core.FontLoader;
-import cdeler.core.UIUtils;
+import cdeler.core.ui.UIUtils;
 
 public class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);

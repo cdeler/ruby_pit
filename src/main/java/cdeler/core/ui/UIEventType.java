@@ -1,4 +1,4 @@
-package cdeler.core;
+package cdeler.core.ui;
 
 public enum UIEventType {
     TEXT_AREA_TEXT_CHANGED,

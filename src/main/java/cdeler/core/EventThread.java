@@ -15,15 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class EventThread implements Runnable {
+public class EventThread<EventType extends Enum> implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventThread.class);
     private static final int HANDLED_EVENTS_THRESHOLD = 75;
     private static final int DELAY_SIZE_MS = 250;
 
-    private final BlockingQueue<UIEvent> eventQueue;
-    private final Map<UIEventType, Function<List<UIEvent>, Void>> consumers;
+    private final BlockingQueue<Event<EventType>> eventQueue;
+    private final Map<EventType, Function<List<Event<EventType>>, Void>> consumers;
 
-    public EventThread(Map<UIEventType, Function<List<UIEvent>, Void>> events) {
+    public EventThread(Map<EventType, Function<List<Event<EventType>>, Void>> events) {
         eventQueue = new LinkedBlockingDeque<>();
         consumers = new ConcurrentHashMap<>(events);
     }
@@ -33,11 +33,11 @@ public class EventThread implements Runnable {
         consumers = new ConcurrentHashMap<>();
     }
 
-    public void fire(UIEvent event) {
+    public void fire(Event<EventType> event) {
         eventQueue.add(event);
     }
 
-    public void addConsumers(Map<UIEventType, Function<List<UIEvent>, Void>> events) {
+    public void addConsumers(Map<EventType, Function<List<Event<EventType>>, Void>> events) {
         consumers.putAll(events);
     }
 
@@ -49,7 +49,7 @@ public class EventThread implements Runnable {
                     var headEvent = eventQueue.poll(DELAY_SIZE_MS, TimeUnit.MILLISECONDS);
 
                     if (headEvent != null) {
-                        var processedEvents = new ArrayList<UIEvent>();
+                        var processedEvents = new ArrayList<Event<EventType>>();
                         processedEvents.add(headEvent);
 
                         while (!eventQueue.isEmpty() && processedEvents.size() < HANDLED_EVENTS_THRESHOLD) {
@@ -57,7 +57,7 @@ public class EventThread implements Runnable {
                             processedEvents.add(headEvent);
                         }
 
-                        processedEvents.stream().collect(Collectors.groupingBy(UIEvent::getEventType))
+                        processedEvents.stream().collect(Collectors.groupingBy(Event::getEventType))
                                 .forEach((uiEventType, uiEvents) -> {
                                     if (consumers.containsKey(uiEventType)) {
                                         consumers.get(uiEventType).apply(uiEvents);

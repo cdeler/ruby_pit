@@ -3,10 +3,16 @@ package cdeler.ide;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -15,16 +21,16 @@ import javax.swing.event.DocumentListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cdeler.core.EventProducer;
+import cdeler.core.Event;
 import cdeler.core.EventThread;
 import cdeler.core.FontLoader;
-import cdeler.core.UIEvent;
-import cdeler.core.UIEventType;
+import cdeler.core.io.IOEventType;
+import cdeler.core.ui.UIEventType;
 
 
 // created using https://stackoverflow.com/questions/36384683/highlighter-highlights-all-the-textarea-instead-of-a
 // -specific-word-and-its-occur
-public class Ide extends JFrame implements EventProducer {
+public class Ide extends JFrame {
     private static final Logger LOGGER = LoggerFactory.getLogger(Ide.class);
 
     private int windowWidth;
@@ -33,23 +39,27 @@ public class Ide extends JFrame implements EventProducer {
     private String windowTitle;
     private final JTextArea textArea;
     private final LineNumberedTextArea lineNumbers;
-    private final EventThread eventThread;
+    private final EventThread<UIEventType> uiEventThread;
+    private final EventThread<IOEventType> ioEventThread;
+    private volatile String fileName = null;
 
-    public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
-               EventThread eventThread) {
+    public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
         this.textArea = new JTextArea();
         this.lineNumbers = new LineNumberedTextArea(textArea);
-        this.eventThread = eventThread;
+        this.uiEventThread = new EventThread<>();
+        this.ioEventThread = new EventThread<>();
 
         uiInitialize();
 
-        this.eventThread.addConsumers(getLineNumbersEventList());
+        this.ioEventThread.addConsumers(getIOEventList());
+        this.uiEventThread.addConsumers(getLineNumbersEventList());
 
-        new Thread(this.eventThread, "line_numbers_event_thread").start();
+        new Thread(this.uiEventThread, "line_numbers_event_thread").start();
+        new Thread(this.ioEventThread, "io_event_thread").start();
 
         LOGGER.info("Ide is initialized");
     }
@@ -74,7 +84,7 @@ public class Ide extends JFrame implements EventProducer {
         textPanel.addComponentListener(new ComponentListener() {
             @Override
             public void componentResized(ComponentEvent componentEvent) {
-                eventThread.fire(new UIEvent(UIEventType.WINDOW_RESIZE));
+                uiEventThread.fire(new Event<>(UIEventType.WINDOW_RESIZE));
             }
 
             @Override
@@ -93,7 +103,8 @@ public class Ide extends JFrame implements EventProducer {
 
         var openButton = new JButton("\uD83D\uDCC2");
         openButton.addActionListener(actionEvent -> {
-            LOGGER.error("Open button pressed");
+            LOGGER.debug("Open button pressed");
+            ioEventThread.fire(new Event<>(IOEventType.FILE_OPEN_EVENT));
         });
 
         var saveButton = new JButton("\uD83D\uDCBE");
@@ -128,28 +139,59 @@ public class Ide extends JFrame implements EventProducer {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("insertUpdate");
-                eventThread.fire(new UIEvent(UIEventType.TEXT_AREA_TEXT_CHANGED));
+                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
 
             @Override
             public void removeUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("removeUpdate");
-                eventThread.fire(new UIEvent(UIEventType.TEXT_AREA_TEXT_CHANGED));
+                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
 
             @Override
             public void changedUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("changedUpdate");
-                eventThread.fire(new UIEvent(UIEventType.TEXT_AREA_TEXT_CHANGED));
+                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
         });
 
-        textArea.addCaretListener(caretEvent -> eventThread.fire(new UIEvent(UIEventType.CARET_UPDATE)));
+        textArea.addCaretListener(caretEvent -> uiEventThread.fire(new Event<>(UIEventType.CARET_UPDATE)));
     }
 
-    @Override
-    public Map<UIEventType, Function<List<UIEvent>, Void>> getLineNumbersEventList() {
-        Map<UIEventType, Function<List<UIEvent>, Void>> result = new HashMap<>();
+    private Map<IOEventType, Function<List<Event<IOEventType>>, Void>> getIOEventList() {
+        Map<IOEventType, Function<List<Event<IOEventType>>, Void>> result = new HashMap<>();
+
+        result.put(IOEventType.FILE_OPEN_EVENT, uiEvent -> {
+            JFileChooser fileOpenDialog = new JFileChooser();
+            int ret = fileOpenDialog.showDialog(null, "Open file");
+            if (ret == JFileChooser.APPROVE_OPTION) {
+                synchronized (this) {
+                    File inputFile = fileOpenDialog.getSelectedFile();
+
+                    LOGGER.info("Opening file " + inputFile.getAbsolutePath());
+
+                    try (var is = new FileInputStream(inputFile);
+                         var reader = new BufferedReader(new InputStreamReader(is))) {
+
+                        textArea.setText(reader.lines().collect(Collectors.joining(System.lineSeparator())));
+                        uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
+
+                        fileName = inputFile.getAbsolutePath();
+                    } catch (IOException e) {
+                        LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
+                    }
+                }
+            }
+
+            return null;
+        });
+
+
+        return result;
+    }
+
+    private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getLineNumbersEventList() {
+        Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
 
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
