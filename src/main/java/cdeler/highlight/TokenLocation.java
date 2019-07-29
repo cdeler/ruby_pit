@@ -38,4 +38,9 @@ public class TokenLocation {
     public int hashCode() {
         return hashCombine(beginLine, endLine, beginColumn, endColumn);
     }
+
+    @Override
+    public String toString() {
+        return "TokenLocation[from (" + beginLine + "," + beginColumn + "), to (" + endLine + "," + endColumn + ")]";
+    }
 }

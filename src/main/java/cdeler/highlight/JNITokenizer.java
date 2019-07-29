@@ -12,19 +12,19 @@ import java.util.stream.Collectors;
 import org.scijava.nativelib.NativeLoader;
 
 
-public class JNITokenizer extends AbstractTokenizer<Optional<AST<TokenLocation>>> {
+public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
     static {
         try {
-            NativeLoader.loadLibrary("r_tree_sitter");
+            NativeLoader.loadLibrary("rubypit");
         } catch (UnsatisfiedLinkError | IOException e) {
             throw new RuntimeException("Highlight will never work", e);
         }
     }
 
     @Override
-    protected Optional<AST<TokenLocation>> feed(InputStream is) throws HighlightException {
+    protected Optional<AST<Token>> feed(InputStream is) throws HighlightException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            return Optional.of(feed_internal(reader.lines().collect(Collectors.joining())));
+            return Optional.ofNullable(feed_internal(reader.lines().collect(Collectors.joining())));
         } catch (IOException e) {
         }
 
@@ -32,14 +32,14 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<TokenLocation>>
     }
 
     @Override
-    protected List<Token> build(Optional<AST<TokenLocation>> data) {
+    protected List<Token> build(Optional<AST<Token>> data) {
         List<Token> result = new ArrayList<>();
 
         if (data.isPresent()) {
             var tokenData = data.get();
 
-            tokenData.walk((tokenLocation -> {
-                result.add(new ASTToken(tokenLocation));
+            tokenData.walk((token -> {
+                result.add(token);
                 return null;
             }));
         }
@@ -47,5 +47,5 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<TokenLocation>>
         return result;
     }
 
-    private native AST<TokenLocation> feed_internal(String source);
+    private native AST<Token> feed_internal(String source);
 }

@@ -45,4 +45,9 @@ public class SourceToken implements Token {
         return tokenLocation;
     }
 
+    @Override
+    public String toString() {
+        return "SourceToken<" + getTokenType() + ", " + getLocation() + ">";
+    }
+
 }
