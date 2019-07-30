@@ -26,6 +26,7 @@ import cdeler.core.EventThread;
 import cdeler.core.FontLoader;
 import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
+import cdeler.highlight.TextAreaHighlighter;
 
 
 // created using https://stackoverflow.com/questions/36384683/highlighter-highlights-all-the-textarea-instead-of-a
@@ -41,9 +42,12 @@ public class Ide extends JFrame {
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
     private final EventThread<IOEventType> ioEventThread;
+    private final TextAreaHighlighter highlighter;
+
     private volatile String fileName = null;
 
-    public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle) {
+    public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
+               TextAreaHighlighter highlighter) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
@@ -52,6 +56,7 @@ public class Ide extends JFrame {
         this.lineNumbers = new LineNumberedTextArea(textArea);
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
+        this.highlighter = highlighter;
 
         uiInitialize();
 
@@ -196,20 +201,26 @@ public class Ide extends JFrame {
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
+            highlighter.highlight(textArea);
+
             return null;
         });
         result.put(UIEventType.CARET_UPDATE, uiEvents -> {
             lineNumbers.highlightCaretPosition();
+
             return null;
         });
         result.put(UIEventType.WINDOW_RESIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
+
             return null;
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
+            highlighter.highlight(textArea);
+
             return null;
         });
 

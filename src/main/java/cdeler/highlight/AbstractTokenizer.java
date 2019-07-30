@@ -1,6 +1,5 @@
 package cdeler.highlight;
 
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,14 +9,14 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTokenizer<T> implements Tokenizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTokenizer.class);
 
-    protected abstract T feed(InputStream is) throws HighlightException;
+    protected abstract T feed(String inputText) throws HighlightException;
 
     protected abstract List<Token> build(T data);
 
     @Override
-    final public List<Token> harvest(InputStream is) {
+    final public List<Token> harvest(String inputText) {
         try {
-            T intermediateData = feed(is);
+            T intermediateData = feed(inputText);
             return build(intermediateData);
         } catch (HighlightException ex) {
             LOGGER.error("Error happens during harvesting", ex);

@@ -3,13 +3,19 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
+    <bean id="jni_tokenizer" class="cdeler.highlight.JNITokenizer"/>
+
+    <bean id="highlighter" class="cdeler.highlight.TextAreaHighlighter">
+        <constructor-arg index="0" ref="jni_tokenizer"/>
+    </bean>
+
     <bean id="main_application" class="cdeler.ide.Ide">
         <constructor-arg index="0" value="800"/>
         <constructor-arg index="1" value="600"/>
         <constructor-arg index="2" value="/icons8-ruby-programming-language-64.png"/>
         <constructor-arg index="3" value="Ruby Pit"/>
+        <constructor-arg index="4" ref="highlighter"/>
     </bean>
 
-    <bean id="jni_tokenizer" class="cdeler.highlight.JNITokenizer"/>
 
 </beans>

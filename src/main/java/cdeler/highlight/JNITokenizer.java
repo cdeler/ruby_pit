@@ -1,13 +1,9 @@
 package cdeler.highlight;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.scijava.nativelib.NativeLoader;
 
@@ -22,14 +18,12 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
     }
 
     @Override
-    protected Optional<AST<Token>> feed(InputStream is) throws HighlightException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            var native_result = feed_internal(reader.lines().collect(Collectors.joining()));
-            return Optional.ofNullable(native_result);
-        } catch (IOException e) {
-        }
+    protected Optional<AST<Token>> feed(String inputText) throws HighlightException {
+        synchronized (this) {
+            var nativeResult = feed_internal(inputText);
 
-        return Optional.empty();
+            return Optional.ofNullable(nativeResult);
+        }
     }
 
     @Override
