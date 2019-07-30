@@ -10,14 +10,11 @@ sourceCompatibility = 1.11
 repositories {
     mavenCentral()
 }
-task copyTreesitterRubyGrammar(type: Copy) {
-    from("$projectDir/src/main/c/tree-sitter-ruby")
-    into("$buildDir/resources/main/tree-sitter/")
-}
+
 
 // create a single Jar with all dependencies
 // from https://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
-task fatJar(type: Jar, dependsOn: ['copyTreesitterRubyGrammar']) {
+task fatJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'RubyPit IDE',
                 'Implementation-Version': version,

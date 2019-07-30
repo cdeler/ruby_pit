@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import cdeler.highlight.TokenType;
 
 public class UISettings {
+    private static final String DEFAULT_SETTINGS_NAME = "default";
     private String name;
     private String fontName;
     private int fontSize;
@@ -16,7 +17,7 @@ public class UISettings {
     public static UISettings getDefaultSettings() {
         UISettings result = new UISettings();
 
-        result.name = "Default";
+        result.name = getDefaultSettingsName();
         result.fontName = "iosevka-regular";
         result.fontSize = 20;
 
@@ -27,6 +28,10 @@ public class UISettings {
                 ));
 
         return result;
+    }
+
+    public static String getDefaultSettingsName() {
+        return DEFAULT_SETTINGS_NAME;
     }
 
     @Override
