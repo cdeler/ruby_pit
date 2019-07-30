@@ -28,6 +28,7 @@ import cdeler.core.FontLoader;
 import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
 import cdeler.highlight.TextAreaHighlighter;
+import cdeler.highlight.settings.UISettingsManager;
 
 
 // created using https://stackoverflow.com/questions/36384683/highlighter-highlights-all-the-textarea-instead-of-a
@@ -44,11 +45,12 @@ public class Ide extends JFrame {
     private final EventThread<UIEventType> uiEventThread;
     private final EventThread<IOEventType> ioEventThread;
     private final TextAreaHighlighter highlighter;
+    private final UISettingsManager settingsManager;
 
     private volatile String fileName = null;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
-               TextAreaHighlighter highlighter) {
+               TextAreaHighlighter highlighter, UISettingsManager settingsManager) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
@@ -58,6 +60,7 @@ public class Ide extends JFrame {
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
         this.highlighter = highlighter;
+        this.settingsManager = settingsManager;
 
         uiInitialize();
 

@@ -7,6 +7,7 @@
 
     <bean id="highlighter" class="cdeler.highlight.TextAreaHighlighter">
         <constructor-arg index="0" ref="jni_tokenizer"/>
+        <constructor-arg index="1" ref="settings_manager"/>
     </bean>
 
     <bean id="main_application" class="cdeler.ide.Ide">
@@ -15,7 +16,11 @@
         <constructor-arg index="2" value="/icons8-ruby-programming-language-64.png"/>
         <constructor-arg index="3" value="Ruby Pit"/>
         <constructor-arg index="4" ref="highlighter"/>
+        <constructor-arg index="5" ref="settings_manager"/>
     </bean>
 
+    <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager" scope="singleton">
+        <constructor-arg index="0" value="settings"/>
+    </bean>
 
 </beans>

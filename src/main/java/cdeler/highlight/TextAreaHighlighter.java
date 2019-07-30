@@ -11,13 +11,17 @@ import javax.swing.text.StyledDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cdeler.highlight.settings.UISettingsManager;
+
 public class TextAreaHighlighter {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextAreaHighlighter.class);
 
     private final Tokenizer tokenizer;
+    private final UISettingsManager settingsManager;
 
-    public TextAreaHighlighter(Tokenizer tokenizer) {
+    public TextAreaHighlighter(Tokenizer tokenizer, UISettingsManager settingManager) {
         this.tokenizer = tokenizer;
+        this.settingsManager = settingManager;
     }
 
     public synchronized void highlight(JTextPane textArea) {
@@ -46,7 +50,7 @@ public class TextAreaHighlighter {
                 }
 
                 if (0 <= startOffset && startOffset < endOffset) {
-                    highlight(textArea, startOffset, endOffset);
+                    highlight(textArea, sourceToken.getTokenType(), startOffset, endOffset);
                 }
             }
         });
@@ -54,7 +58,7 @@ public class TextAreaHighlighter {
         LOGGER.debug("Leave highlight");
     }
 
-    private static void highlight(JTextPane textArea, int startOffset, int endOffset) {
+    private void highlight(JTextPane textArea, TokenType tokenType, int startOffset, int endOffset) {
         StyledDocument doc = (StyledDocument) textArea.getDocument();
         Element element = doc.getCharacterElement(startOffset);
         AttributeSet as = element.getAttributes();

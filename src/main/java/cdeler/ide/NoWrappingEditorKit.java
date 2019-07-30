@@ -18,7 +18,7 @@ public class NoWrappingEditorKit extends StyledEditorKit {
     }
 
     /* The extended view factory */
-    static class ExtendedStyledViewFactory implements ViewFactory {
+    private static class ExtendedStyledViewFactory implements ViewFactory {
         public View create(Element elem) {
             String elementName = elem.getName();
             if (elementName != null) {
@@ -32,7 +32,7 @@ public class NoWrappingEditorKit extends StyledEditorKit {
         }
     }
 
-    static class ExtendedParagraphView extends ParagraphView {
+    private static class ExtendedParagraphView extends ParagraphView {
         public ExtendedParagraphView(Element elem) {
             super(elem);
         }
