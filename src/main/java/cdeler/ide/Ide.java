@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultStyledDocument;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import cdeler.core.FontLoader;
 import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
 import cdeler.highlight.TextAreaHighlighter;
+import cdeler.highlight.settings.UISettingsManager;
 
 
 // created using https://stackoverflow.com/questions/36384683/highlighter-highlights-all-the-textarea-instead-of-a
@@ -38,25 +40,27 @@ public class Ide extends JFrame {
     private int windowHeight;
     private String iconPath;
     private String windowTitle;
-    private final JTextArea textArea;
+    private final JTextPane textArea;
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
     private final EventThread<IOEventType> ioEventThread;
     private final TextAreaHighlighter highlighter;
+    private final UISettingsManager settingsManager;
 
     private volatile String fileName = null;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
-               TextAreaHighlighter highlighter) {
+               TextAreaHighlighter highlighter, UISettingsManager settingsManager) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
-        this.textArea = new JTextArea();
+        this.textArea = new JTextPane(new DefaultStyledDocument());
         this.lineNumbers = new LineNumberedTextArea(textArea);
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
         this.highlighter = highlighter;
+        this.settingsManager = settingsManager;
 
         uiInitialize();
 
@@ -83,6 +87,8 @@ public class Ide extends JFrame {
 
         var scrollPane = new JScrollPane(textArea);
         scrollPane.setRowHeaderView(lineNumbers);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         var textPanel = new JPanel(new BorderLayout());
 
@@ -105,7 +111,6 @@ public class Ide extends JFrame {
             }
         });
 
-
         var openButton = new JButton("\uD83D\uDCC2");
         openButton.addActionListener(actionEvent -> {
             LOGGER.debug("Open button pressed");
@@ -127,17 +132,15 @@ public class Ide extends JFrame {
         add(topPanel, BorderLayout.NORTH);
         add(textPanel, BorderLayout.CENTER);
 
-        lineNumbers.updateLineNumbers();
+        setMinimumSize(new Dimension(600, 300));
+        setPreferredSize(new Dimension(800, 600));
         pack();
     }
 
     private void initializeTextArea() {
-        textArea.setColumns(80);
-        textArea.setRows(30);
-        textArea.setLineWrap(true);
+        textArea.setMinimumSize(new Dimension(800, 600));
         textArea.setEditable(true);
-        textArea.setWrapStyleWord(true);
-
+        textArea.setEditorKit(new NoWrappingEditorKit());
         textArea.setFont(FontLoader.load("iosevka-regular", 20));
 
         textArea.getDocument().addDocumentListener(new DocumentListener() {
@@ -155,8 +158,6 @@ public class Ide extends JFrame {
 
             @Override
             public void changedUpdate(DocumentEvent documentEvent) {
-                LOGGER.debug("changedUpdate");
-                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
         });
 

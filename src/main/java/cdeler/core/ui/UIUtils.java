@@ -3,6 +3,8 @@ package cdeler.core.ui;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import cdeler.core.Pair;
 
@@ -22,22 +24,12 @@ public class UIUtils {
         return sb.toString();
     }
 
-    public static String formatLineNumbers(List<Integer> lineNumbers, int lineNumberMinLength) {
-        final StringBuilder sb = new StringBuilder();
+    public static String formatLineNumbers(int firstLineInclusive, int lastLineExclusive, int lineNumberMinLength) {
+        return IntStream.range(firstLineInclusive, lastLineExclusive)
+                .boxed()
+                .map(lineNumber -> formatNumber(lineNumber, lineNumberMinLength))
+                .collect(Collectors.joining(System.lineSeparator()));
 
-        int prevNumber = Integer.MIN_VALUE;
-        String emptyLine = " ".repeat(Math.max(0, lineNumberMinLength));
-
-        for (int currentNumber : lineNumbers) {
-            if (currentNumber != prevNumber) {
-                sb.append(formatNumber(currentNumber, lineNumberMinLength)).append(System.lineSeparator());
-            } else {
-                sb.append(emptyLine).append(System.lineSeparator());
-            }
-            prevNumber = currentNumber;
-        }
-
-        return sb.toString();
     }
 
     public static Optional<Pair<Integer>> getHighlightedArea(List<Integer> lineNumbers, int caretLine) {

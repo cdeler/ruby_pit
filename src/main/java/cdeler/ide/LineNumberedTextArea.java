@@ -1,13 +1,11 @@
 package cdeler.ide;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Utilities;
+import javax.swing.text.Element;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,72 +17,44 @@ public class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
     private static final int MIN_SYMBOL_WIDTH = 3;
 
-    private final JTextArea textArea;
-    private final List<Integer> lineNumbers;
+    private final JTextPane textArea;
 
-    public LineNumberedTextArea(JTextArea textArea) {
+    public LineNumberedTextArea(JTextPane textArea) {
         this.textArea = textArea;
-        this.lineNumbers = new ArrayList<>();
         setBackground(Color.LIGHT_GRAY);
         setEditable(false);
         setFont(FontLoader.load("iosevka-regular", 20));
     }
 
     public synchronized void highlightCaretPosition() {
-        if (lineNumbers.isEmpty()) {
-            return;
-        }
-
+        //SwingUtilities.invokeLater(() -> {
         try {
+            Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
+
             int caretPosition = textArea.getCaretPosition();
-            int caretLine = textArea.getLineOfOffset(caretPosition);
+            int textAreaEndOffset = textAreaRoot.getEndOffset();
 
-            var highlightedArea = UIUtils.getHighlightedArea(lineNumbers, caretLine + 1);
+            if (0 <= caretPosition && caretPosition < textAreaEndOffset) {
+                int rowNumber = textAreaRoot.getElementIndex(caretPosition);
+                int startHighlightOffset = getLineStartOffset(rowNumber);
+                int endHighlightOffset = getLineEndOffset(rowNumber);
 
-            if (highlightedArea.isPresent()) {
                 getHighlighter().removeAllHighlights();
                 getHighlighter().addHighlight(
-                        getLineStartOffset(highlightedArea.get().first()),
-                        getLineEndOffset(highlightedArea.get().second()),
+                        startHighlightOffset,
+                        endHighlightOffset,
                         new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
             }
-        } catch (BadLocationException e) {
-            LOGGER.error("Invalid caret position", e);
-        } catch (IndexOutOfBoundsException e) {
-            LOGGER.error("Invalid highlight location", e);
+        } catch (IndexOutOfBoundsException | BadLocationException e) {
+            // LOGGER.error("Unable to highlight line numbers", e);
         }
+        //});
     }
 
     public synchronized void updateLineNumbers() {
-        this.lineNumbers.clear();
-        this.lineNumbers.addAll(getLineNumbersData());
+        int linesCount = textArea.getDocument().getDefaultRootElement().getElementCount();
 
-        setText(UIUtils.formatLineNumbers(this.lineNumbers, MIN_SYMBOL_WIDTH));
+        setText(UIUtils.formatLineNumbers(1, linesCount + 1, MIN_SYMBOL_WIDTH));
     }
 
-    // TODO sync issue when textArea is changing in the loop
-    private List<Integer> getLineNumbersData() {
-        LOGGER.debug("Trace getLineNumbersText()");
-
-        List<Integer> lineNumbersData = new ArrayList<>(lineNumbers.size());
-
-        try {
-            int rowStartOffset = Utilities.getRowStart(textArea, 0);
-            int endOffset = textArea.getLineEndOffset(textArea.getLineCount() - 1);
-
-            if (endOffset >= 1) {
-                while (rowStartOffset <= endOffset) {
-                    int lineNumber = textArea.getLineOfOffset(rowStartOffset) + 1;
-
-                    lineNumbersData.add(lineNumber);
-                    rowStartOffset = Utilities.getRowEnd(textArea, rowStartOffset) + 1;
-                }
-            }
-        } catch (BadLocationException e) {
-            // we can just ignore it, since this error is raised when (look at line 70)
-            // rowStartOffset becomes invalid when we speedly delete text lines from textArea
-        }
-
-        return lineNumbersData;
-    }
 }
