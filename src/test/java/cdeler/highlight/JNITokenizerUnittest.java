@@ -17,12 +17,12 @@ public class JNITokenizerUnittest {
         String inputSource = "puts \"Hello world!\"";
         JNITokenizer tokenizer = new JNITokenizer();
         var expected = Arrays.asList(
-                new SourceToken(TokenType.identifier, new TokenLocation(0, 0, 0, 3)),
-                new SourceToken(TokenType.string, new TokenLocation(0, 5, 0, 18))
+                new SourceToken(TokenType.identifier, new TokenLocation(0, 0, 0, 4)),
+                new SourceToken(TokenType.string, new TokenLocation(0, 5, 0, 19))
         );
 
         // when
-        List<Token> actual = null;
+        List<Token> actual;
 
         try (var is = IOUtils.toInputStream(inputSource)) {
             actual = tokenizer.harvest(is);

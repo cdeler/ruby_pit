@@ -1,5 +1,7 @@
 package cdeler.highlight;
 
+import cdeler.core.ui.UIUtils;
+
 public class TokenLocation {
     public final int beginLine;
     public final int beginColumn;
@@ -26,17 +28,10 @@ public class TokenLocation {
                 && (endColumn == ((TokenLocation) obj).endColumn);
     }
 
-    // algorithm was taken from boost hash_combine (0x9e3779b9 also came from the boost)
-    private static int hashCombine(int seed, int... rest) {
-        for (int it : rest) {
-            seed ^= (0x9e3779b9 + (it << 6) + (it >> 2));
-        }
-        return seed;
-    }
 
     @Override
     public int hashCode() {
-        return hashCombine(beginLine, endLine, beginColumn, endColumn);
+        return UIUtils.hashCombine(beginLine, endLine, beginColumn, endColumn);
     }
 
     @Override

@@ -15,8 +15,10 @@ public class AST<T> {
     public void walk(Function<T, Void> functor) {
         functor.apply(node);
 
-        for (var child : childes) {
-            child.walk(functor);
+        if (childes != null) {
+            for (var child : childes) {
+                child.walk(functor);
+            }
         }
     }
 }

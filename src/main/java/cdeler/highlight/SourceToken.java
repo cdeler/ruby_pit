@@ -1,12 +1,10 @@
 package cdeler.highlight;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Objects;
+
+import cdeler.core.ui.UIUtils;
 
 public class SourceToken implements Token {
-    private static final Pattern SOURCE_PATTERN =
-            Pattern.compile("(?:\\s+)?\\(([a-z]+) \\[(\\d+), (\\d+)] - \\[(\\d+), (\\d+)].*");
     private final TokenType tokenType;
     private final TokenLocation tokenLocation;
 
@@ -15,24 +13,9 @@ public class SourceToken implements Token {
         this.tokenLocation = tokenLocation;
     }
 
-    public static Optional<SourceToken> fromTreeSitterLine(final String treeSitterOutput) {
-        final Matcher matcher = SOURCE_PATTERN.matcher(treeSitterOutput);
-
-        if (matcher.matches()) {
-            var tokenType = TokenType.getEnum(matcher.group(1));
-
-            if (tokenType != TokenType.unknown) {
-                int beginLine = Integer.valueOf(matcher.group(2));
-                int beginColumn = Integer.valueOf(matcher.group(3));
-                int endLine = Integer.valueOf(matcher.group(4));
-                int endColumn = Integer.valueOf(matcher.group(5));
-
-                return Optional.of(new SourceToken(tokenType,
-                        new TokenLocation(beginLine, beginColumn, endLine, endColumn)));
-            }
-        }
-
-        return Optional.empty();
+    public SourceToken(TokenType tokenType, int beginLine, int beginColumn, int endLine, int endColumn) {
+        this.tokenType = tokenType;
+        this.tokenLocation = new TokenLocation(beginLine, beginColumn, endLine, endColumn);
     }
 
     @Override
@@ -48,6 +31,21 @@ public class SourceToken implements Token {
     @Override
     public String toString() {
         return "SourceToken<" + getTokenType() + ", " + getLocation() + ">";
+    }
+
+    @Override
+    public int hashCode() {
+        return UIUtils.hashCombine(Objects.hashCode(tokenType), Objects.hashCode(tokenLocation));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SourceToken)) {
+            return false;
+        }
+
+        return Objects.equals(tokenType, ((SourceToken) obj).tokenType)
+                && Objects.equals(tokenLocation, ((SourceToken) obj).tokenLocation);
     }
 
 }

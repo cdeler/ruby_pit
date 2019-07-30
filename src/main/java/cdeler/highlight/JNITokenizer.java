@@ -24,7 +24,8 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
     @Override
     protected Optional<AST<Token>> feed(InputStream is) throws HighlightException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            return Optional.ofNullable(feed_internal(reader.lines().collect(Collectors.joining())));
+            var native_result = feed_internal(reader.lines().collect(Collectors.joining()));
+            return Optional.ofNullable(native_result);
         } catch (IOException e) {
         }
 
@@ -39,7 +40,10 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
             var tokenData = data.get();
 
             tokenData.walk((token -> {
-                result.add(token);
+                if (TokenType.isHighlightedToken(token.getTokenType())) {
+                    result.add(token);
+                }
+
                 return null;
             }));
         }
