@@ -38,7 +38,7 @@ public class Ide extends JFrame {
     private int windowHeight;
     private String iconPath;
     private String windowTitle;
-    private final JTextArea textArea;
+    private final JTextPane textArea;
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
     private final EventThread<IOEventType> ioEventThread;
@@ -52,7 +52,7 @@ public class Ide extends JFrame {
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
-        this.textArea = new JTextArea();
+        this.textArea = new JTextPane();
         this.lineNumbers = new LineNumberedTextArea(textArea);
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
@@ -83,6 +83,8 @@ public class Ide extends JFrame {
 
         var scrollPane = new JScrollPane(textArea);
         scrollPane.setRowHeaderView(lineNumbers);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         var textPanel = new JPanel(new BorderLayout());
 
@@ -132,11 +134,12 @@ public class Ide extends JFrame {
     }
 
     private void initializeTextArea() {
-        textArea.setColumns(80);
-        textArea.setRows(30);
-        textArea.setLineWrap(true);
+        textArea.setMinimumSize(new Dimension(800, 600));
+        //textArea.setColumns(80);
+        //textArea.setRows(30);
+        //textArea.setLineWrap(true);
         textArea.setEditable(true);
-        textArea.setWrapStyleWord(true);
+        //textArea.setWrapStyleWord(true);
 
         textArea.setFont(FontLoader.load("iosevka-regular", 20));
 
@@ -201,7 +204,7 @@ public class Ide extends JFrame {
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
-            highlighter.highlight(textArea);
+            //highlighter.highlight(textArea);
 
             return null;
         });
@@ -219,7 +222,7 @@ public class Ide extends JFrame {
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
-            highlighter.highlight(textArea);
+            //highlighter.highlight(textArea);
 
             return null;
         });
