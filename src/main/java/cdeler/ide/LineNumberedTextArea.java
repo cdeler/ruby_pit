@@ -27,10 +27,14 @@ public class LineNumberedTextArea extends JTextArea {
     }
 
     public synchronized void highlightCaretPosition() {
+        //SwingUtilities.invokeLater(() -> {
         try {
-            int caretPosition = textArea.getCaretPosition();
             Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
-            if (textAreaRoot.getEndOffset() > 0) {
+
+            int caretPosition = textArea.getCaretPosition();
+            int textAreaEndOffset = textAreaRoot.getEndOffset();
+
+            if (0 <= caretPosition && caretPosition < textAreaEndOffset) {
                 int rowNumber = textAreaRoot.getElementIndex(caretPosition);
                 int startHighlightOffset = getLineStartOffset(rowNumber);
                 int endHighlightOffset = getLineEndOffset(rowNumber);
@@ -42,8 +46,9 @@ public class LineNumberedTextArea extends JTextArea {
                         new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
             }
         } catch (IndexOutOfBoundsException | BadLocationException e) {
-            LOGGER.error("Unable to highlight line numbers", e);
+            // LOGGER.error("Unable to highlight line numbers", e);
         }
+        //});
     }
 
     public synchronized void updateLineNumbers() {

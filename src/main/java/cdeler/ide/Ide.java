@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultStyledDocument;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ public class Ide extends JFrame {
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
-        this.textArea = new JTextPane();
+        this.textArea = new JTextPane(new DefaultStyledDocument());
         this.lineNumbers = new LineNumberedTextArea(textArea);
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
@@ -107,7 +108,6 @@ public class Ide extends JFrame {
             }
         });
 
-
         var openButton = new JButton("\uD83D\uDCC2");
         openButton.addActionListener(actionEvent -> {
             LOGGER.debug("Open button pressed");
@@ -129,18 +129,15 @@ public class Ide extends JFrame {
         add(topPanel, BorderLayout.NORTH);
         add(textPanel, BorderLayout.CENTER);
 
-        lineNumbers.updateLineNumbers();
+        setMinimumSize(new Dimension(600, 300));
+        setPreferredSize(new Dimension(800, 600));
         pack();
     }
 
     private void initializeTextArea() {
         textArea.setMinimumSize(new Dimension(800, 600));
-        //textArea.setColumns(80);
-        //textArea.setRows(30);
-        //textArea.setLineWrap(true);
         textArea.setEditable(true);
-        //textArea.setWrapStyleWord(true);
-
+        textArea.setEditorKit(new NoWrappingEditorKit());
         textArea.setFont(FontLoader.load("iosevka-regular", 20));
 
         textArea.getDocument().addDocumentListener(new DocumentListener() {
@@ -158,8 +155,6 @@ public class Ide extends JFrame {
 
             @Override
             public void changedUpdate(DocumentEvent documentEvent) {
-                LOGGER.debug("changedUpdate");
-                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
             }
         });
 
@@ -204,7 +199,7 @@ public class Ide extends JFrame {
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
-            //highlighter.highlight(textArea);
+            highlighter.highlight(textArea);
 
             return null;
         });
@@ -222,7 +217,7 @@ public class Ide extends JFrame {
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
-            //highlighter.highlight(textArea);
+            highlighter.highlight(textArea);
 
             return null;
         });

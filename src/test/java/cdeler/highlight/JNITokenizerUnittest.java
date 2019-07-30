@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -22,11 +21,7 @@ public class JNITokenizerUnittest {
         );
 
         // when
-        List<Token> actual;
-
-        try (var is = IOUtils.toInputStream(inputSource)) {
-            actual = tokenizer.harvest(is);
-        }
+        List<Token> actual = tokenizer.harvest(inputSource);
 
         // then
         assertNotNull(actual);
