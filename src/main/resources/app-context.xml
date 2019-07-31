@@ -22,7 +22,6 @@
     </bean>
 
     <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager">
-        <constructor-arg name="settingsDirectoryPath" value="settings"/>
         <constructor-arg name="defaultSettings">
             <bean class="cdeler.highlight.settings.UISettings">
                 <constructor-arg name="name" value="default"/>

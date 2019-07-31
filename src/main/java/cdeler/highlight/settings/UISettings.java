@@ -6,7 +6,6 @@ import java.util.Objects;
 import cdeler.highlight.token.TokenType;
 
 public class UISettings {
-    private static final String DEFAULT_SETTINGS_NAME = "default";
     private final String name;
     private final String fontName;
     private final int fontSize;
