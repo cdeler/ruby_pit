@@ -6,21 +6,47 @@
     <bean id="jni_tokenizer" class="cdeler.highlight.token.JNITokenizer"/>
 
     <bean id="highlighter" class="cdeler.highlight.highlighters.LineTextHighlighter">
-        <constructor-arg index="0" ref="jni_tokenizer"/>
-        <constructor-arg index="1" ref="settings_manager"/>
+        <constructor-arg name="tokenizer" ref="jni_tokenizer"/>
+        <constructor-arg name="settingManager" ref="settings_manager"/>
     </bean>
 
     <bean id="main_application" class="cdeler.ide.Ide">
-        <constructor-arg index="0" value="800"/>
-        <constructor-arg index="1" value="600"/>
-        <constructor-arg index="2" value="/icons8-ruby-programming-language-64.png"/>
-        <constructor-arg index="3" value="Ruby Pit"/>
-        <constructor-arg index="4" ref="highlighter"/>
-        <constructor-arg index="5" ref="settings_manager"/>
+        <constructor-arg name="windowWidth" value="800"/>
+        <constructor-arg name="windowHeight" value="600"/>
+        <constructor-arg name="iconPath" value="/icons8-ruby-programming-language-64.png"/>
+        <constructor-arg name="windowTitle" value="Ruby Pit"/>
+        <constructor-arg name="highlighter" ref="highlighter"/>
+        <constructor-arg name="uiSettingsManager" ref="settings_manager"/>
     </bean>
 
     <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager">
-        <constructor-arg index="0" value="settings"/>
+        <constructor-arg name="settingsDirectoryPath" value="settings"/>
+        <constructor-arg name="defaultSettings">
+            <bean class="cdeler.highlight.settings.UISettings">
+                <constructor-arg name="name" value="default"/>
+                <constructor-arg name="fontName" value="iosevka-regular"/>
+                <constructor-arg name="fontSize" value="20"/>
+                <constructor-arg name="tokenStyle">
+                    <map>
+                        <entry key="symbol">
+                            <bean class="cdeler.highlight.settings.TokenStyle">
+                                <constructor-arg name="color" value="#C74FFF"/>
+                            </bean>
+                        </entry>
+                        <entry key="string">
+                            <bean class="cdeler.highlight.settings.TokenStyle">
+                                <constructor-arg name="color" value="#35FF9F"/>
+                            </bean>
+                        </entry>
+                        <entry key="constant">
+                            <bean class="cdeler.highlight.settings.TokenStyle">
+                                <constructor-arg name="color" value="#CC8F16"/>
+                            </bean>
+                        </entry>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
     </bean>
 
 </beans>

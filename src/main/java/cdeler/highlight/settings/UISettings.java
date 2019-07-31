@@ -1,37 +1,22 @@
 package cdeler.highlight.settings;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import cdeler.highlight.token.TokenType;
 
 public class UISettings {
     private static final String DEFAULT_SETTINGS_NAME = "default";
-    private String name;
-    private String fontName;
-    private int fontSize;
-    private Map<TokenType, TokenStyle> tokenStyle;
+    private final String name;
+    private final String fontName;
+    private final int fontSize;
+    private final Map<TokenType, TokenStyle> tokenStyle;
 
-    public static UISettings getDefaultSettings() {
-        UISettings result = new UISettings();
-
-        result.name = getDefaultSettingsName();
-        result.fontName = "iosevka-regular";
-        result.fontSize = 20;
-
-        result.tokenStyle = Arrays.stream(TokenType.values())
-                .collect(Collectors.toMap(
-                        it -> it,
-                        it -> TokenStyle.getDefaultTokenStyle()
-                ));
-
-        return result;
-    }
-
-    public static String getDefaultSettingsName() {
-        return DEFAULT_SETTINGS_NAME;
+    public UISettings(String name, String fontName, int fontSize, Map<TokenType, TokenStyle> tokenStyle) {
+        this.name = name;
+        this.fontName = fontName;
+        this.fontSize = fontSize;
+        this.tokenStyle = tokenStyle;
     }
 
     @Override
@@ -44,11 +29,7 @@ public class UISettings {
             return false;
         }
 
-        return Objects.equals(obj, this);
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return Objects.equals(((UISettings) obj).getName(), getName());
     }
 
     public String getName() {
@@ -59,23 +40,11 @@ public class UISettings {
         return fontName;
     }
 
-    public void setFontName(String fontName) {
-        this.fontName = fontName;
-    }
-
     public int getFontSize() {
         return fontSize;
     }
 
-    public void setFontSize(int fontSize) {
-        this.fontSize = fontSize;
-    }
-
     public Map<TokenType, TokenStyle> getTokenStyle() {
         return tokenStyle;
-    }
-
-    public void setTokenStyle(Map<TokenType, TokenStyle> tokenStyle) {
-        this.tokenStyle = tokenStyle;
     }
 }

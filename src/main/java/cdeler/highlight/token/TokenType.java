@@ -16,7 +16,8 @@ public enum TokenType {
 
     private static final List<TokenType> HIGHLIGHTED_TOKENS = Arrays.asList(
             TokenType.string,
-            TokenType.symbol
+            TokenType.symbol,
+            TokenType.constant
     );
 
     public static boolean isHighlightedToken(TokenType ttype) {

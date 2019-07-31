@@ -7,25 +7,39 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 public class TokenStyle {
-    private static final TokenStyle DEFAULT_TOKEN_STYLE = new TokenStyle("000000", false, false);
-    private static final AttributeSet DEFAULT_ATTRIBUTE_SET;
+    private static final TokenStyle FALLBACK_TOKEN_STYLE = new TokenStyle("000000", false, false);
+    private static final AttributeSet FALLBACK_ATTRIBUTE_SET;
 
     static {
         var style = new SimpleAttributeSet();
-        StyleConstants.setItalic(style, DEFAULT_TOKEN_STYLE.isItalic());
-        StyleConstants.setBold(style, DEFAULT_TOKEN_STYLE.isBold());
-        StyleConstants.setForeground(style, Color.decode(DEFAULT_TOKEN_STYLE.getColor()));
-        DEFAULT_ATTRIBUTE_SET = style;
+        StyleConstants.setItalic(style, FALLBACK_TOKEN_STYLE.isItalic());
+        StyleConstants.setBold(style, FALLBACK_TOKEN_STYLE.isBold());
+        StyleConstants.setForeground(style, FALLBACK_TOKEN_STYLE.getColor());
+        FALLBACK_ATTRIBUTE_SET = style;
     }
 
     private boolean bold;
     private boolean italic;
-    private String color;
+    private Color color;
 
     public TokenStyle(String color, boolean bold, boolean italic) {
+        this.color = Color.decode(color);
+        this.bold = bold;
+        this.italic = italic;
+    }
+
+    public TokenStyle(String color) {
+        this(color, false, false);
+    }
+
+    public TokenStyle(Color color, boolean bold, boolean italic) {
         this.color = color;
         this.bold = bold;
         this.italic = italic;
+    }
+
+    public TokenStyle(Color color) {
+        this(color, false, false);
     }
 
     public boolean isBold() {
@@ -36,15 +50,15 @@ public class TokenStyle {
         return italic;
     }
 
-    public String getColor() {
+    public Color getColor() {
         return color;
     }
 
-    public static TokenStyle getDefaultTokenStyle() {
-        return DEFAULT_TOKEN_STYLE;
+    public static TokenStyle getFallbackTokenStyle() {
+        return FALLBACK_TOKEN_STYLE;
     }
 
-    public static AttributeSet getDefaultAttributeSet() {
-        return DEFAULT_ATTRIBUTE_SET;
+    public static AttributeSet getFallbackAttributeSet() {
+        return FALLBACK_ATTRIBUTE_SET;
     }
 }

@@ -31,22 +31,25 @@ public class UISettingsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(UISettingsManager.class);
 
     private final Map<String, UISettings> settingMap;
+    private final UISettings defaultSettings;
     private volatile String activeSettingsSet;
 
-    public UISettingsManager(String settingsDirectoryPath) {
-        this.settingMap = loadSettings(settingsDirectoryPath);
-        this.activeSettingsSet = UISettings.getDefaultSettingsName();
+    public UISettingsManager(String settingsDirectoryPath, UISettings defaultSettings) {
+        this.defaultSettings = defaultSettings;
+        this.settingMap = loadSettings(settingsDirectoryPath, this.defaultSettings);
+        this.activeSettingsSet = this.defaultSettings.getName();
     }
 
-    private static Map<String, UISettings> loadSettings(String settingsPath) {
+    private static Map<String, UISettings> loadSettings(String settingsPath, UISettings defaultSettings) {
         Map<String, UISettings> result = new HashMap<>();
-        result.put(UISettings.getDefaultSettingsName(), UISettings.getDefaultSettings());
+        result.put(defaultSettings.getName(), defaultSettings);
 
         try (var walker = Files.walk(Paths.get(settingsPath))) {
             var storedSettings = walker.filter(Files::isRegularFile)
                     .filter(it -> it.endsWith(".json"))
                     .map(UISettingsManager::loadSetting)
                     .flatMap(Optional::stream)
+                    .filter(it -> !defaultSettings.equals(it))
                     .collect(Collectors.toMap(UISettings::getName, it -> it));
             result.putAll(storedSettings);
         } catch (NoSuchFileException e) {
@@ -61,13 +64,13 @@ public class UISettingsManager {
     private UISettings getActiveSettings() {
         Optional<UISettings> settings = getSettingsByName(activeSettingsSet);
 
-        return settings.orElse(UISettings.getDefaultSettings());
+        return settings.orElse(getDefaultSettings());
     }
 
     public TokenStyle getActiveStyleForTokenType(TokenType tokenType) {
         var activeSettings = getActiveSettings();
 
-        return activeSettings.getTokenStyle().getOrDefault(tokenType, TokenStyle.getDefaultTokenStyle());
+        return activeSettings.getTokenStyle().getOrDefault(tokenType, TokenStyle.getFallbackTokenStyle());
     }
 
     public Font getActiveFont() {
@@ -77,7 +80,7 @@ public class UISettingsManager {
     }
 
     public UISettings getDefaultSettings() {
-        return settingMap.getOrDefault(UISettings.getDefaultSettingsName(), UISettings.getDefaultSettings());
+        return settingMap.getOrDefault(defaultSettings.getName(), defaultSettings);
     }
 
     public Optional<UISettings> getSettingsByName(String settingName) {

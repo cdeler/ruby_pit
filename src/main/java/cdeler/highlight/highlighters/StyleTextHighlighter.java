@@ -1,7 +1,5 @@
 package cdeler.highlight.highlighters;
 
-import java.awt.*;
-
 import javax.swing.*;
 import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
@@ -31,7 +29,7 @@ class StyleTextHighlighter extends BaseTextHighlighter {
         if (length >= 0) {
             StyledDocument doc = (StyledDocument) textArea.getDocument();
             doc.removeStyle("highlight");
-            doc.setCharacterAttributes(0, length, TokenStyle.getDefaultAttributeSet(), true);
+            doc.setCharacterAttributes(0, length, TokenStyle.getFallbackAttributeSet(), true);
         }
     }
 
@@ -46,7 +44,7 @@ class StyleTextHighlighter extends BaseTextHighlighter {
 
         StyleConstants.setItalic(attributes, tokenStyle.isItalic());
         StyleConstants.setBold(attributes, tokenStyle.isBold());
-        StyleConstants.setForeground(attributes, Color.decode(tokenStyle.getColor()));
+        StyleConstants.setForeground(attributes, tokenStyle.getColor());
 
         doc.setCharacterAttributes(startOffset, endOffset - startOffset, attributes, true);
     }

@@ -1,7 +1,5 @@
 package cdeler.highlight.highlighters;
 
-import java.awt.*;
-
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -9,6 +7,7 @@ import javax.swing.text.DefaultHighlighter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cdeler.highlight.settings.TokenStyle;
 import cdeler.highlight.settings.UISettingsManager;
 import cdeler.highlight.token.TokenType;
 import cdeler.highlight.token.Tokenizer;
@@ -24,8 +23,10 @@ public class LineTextHighlighter extends BaseTextHighlighter {
     @Override
     protected void highlight(JTextPane textArea, TokenType tokenType, int startOffset, int endOffset) {
         try {
+            TokenStyle style = settingsManager.getActiveStyleForTokenType(tokenType);
+
             textArea.getHighlighter().addHighlight(startOffset, endOffset,
-                    new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
+                    new DefaultHighlighter.DefaultHighlightPainter(style.getColor()));
         } catch (BadLocationException e) {
             LOGGER.error("Unable to highlight location from " + startOffset + " to " + endOffset, e);
         }
