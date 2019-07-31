@@ -15,7 +15,6 @@ public enum TokenType {
     unknown;
 
     private static final List<TokenType> HIGHLIGHTED_TOKENS = Arrays.asList(
-            identifier,
             string
     );
 

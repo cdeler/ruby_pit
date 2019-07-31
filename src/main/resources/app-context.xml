@@ -5,7 +5,7 @@
 
     <bean id="jni_tokenizer" class="cdeler.highlight.token.JNITokenizer"/>
 
-    <bean id="highlighter" class="cdeler.highlight.highlighters.StyleTextHighlighter">
+    <bean id="highlighter" class="cdeler.highlight.highlighters.LineTextHighlighter">
         <constructor-arg index="0" ref="jni_tokenizer"/>
         <constructor-arg index="1" ref="settings_manager"/>
     </bean>
