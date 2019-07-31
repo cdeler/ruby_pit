@@ -42,27 +42,6 @@ public class UIUtilsUnittest {
     }
 
     @Test
-    public void testFormatLineNumbers() {
-        // given
-        var arg = Arrays.asList(1, 1, 2, 3, 4, 4, 4, 4, 5);
-        var expected = "  1" + System.lineSeparator()
-                + "   " + System.lineSeparator()
-                + "  2" + System.lineSeparator()
-                + "  3" + System.lineSeparator()
-                + "  4" + System.lineSeparator()
-                + "   " + System.lineSeparator()
-                + "   " + System.lineSeparator()
-                + "   " + System.lineSeparator()
-                + "  5" + System.lineSeparator();
-
-        // when
-        String actual = UIUtils.formatLineNumbers(arg, 3);
-
-        // then
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void testForHighlightedAreaSmoke() {
         // given
         var lines = Arrays.asList(1, 2, 3, 4, 5);

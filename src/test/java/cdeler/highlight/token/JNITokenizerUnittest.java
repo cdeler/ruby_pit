@@ -1,16 +1,10 @@
-package cdeler.highlight;
+package cdeler.highlight.token;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-
-import cdeler.highlight.token.JNITokenizer;
-import cdeler.highlight.token.SourceToken;
-import cdeler.highlight.token.Token;
-import cdeler.highlight.token.TokenLocation;
-import cdeler.highlight.token.TokenType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
