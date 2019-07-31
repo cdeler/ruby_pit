@@ -26,7 +26,7 @@ import cdeler.core.Event;
 import cdeler.core.EventThread;
 import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
-import cdeler.highlight.StyleTextHighlighter;
+import cdeler.highlight.highlighters.TextHighlighter;
 import cdeler.highlight.settings.UISettingsManager;
 
 
@@ -43,13 +43,13 @@ public class Ide extends JFrame {
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
     private final EventThread<IOEventType> ioEventThread;
-    private final StyleTextHighlighter highlighter;
+    private final TextHighlighter highlighter;
     private final UISettingsManager uiSettingsManager;
 
     private volatile String fileName = null;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
-               StyleTextHighlighter highlighter, UISettingsManager uiSettingsManager) {
+               TextHighlighter highlighter, UISettingsManager uiSettingsManager) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;

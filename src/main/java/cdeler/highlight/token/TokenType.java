@@ -1,4 +1,4 @@
-package cdeler.highlight;
+package cdeler.highlight.token;
 
 import java.util.Arrays;
 import java.util.Collection;
