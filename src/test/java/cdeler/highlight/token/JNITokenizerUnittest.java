@@ -14,10 +14,26 @@ public class JNITokenizerUnittest {
     public void testHelloWorld() throws IOException {
         // given
         String inputSource = "puts \"Hello world!\"";
-        JNITokenizer tokenizer = new JNITokenizer();
+        Tokenizer tokenizer = new JNITokenizer();
         var expected = Arrays.asList(
-                new SourceToken(TokenType.identifier, new TokenLocation(0, 0, 0, 4)),
                 new SourceToken(TokenType.string, new TokenLocation(0, 5, 0, 19))
+        );
+
+        // when
+        List<Token> actual = tokenizer.harvest(inputSource);
+
+        // then
+        assertNotNull(actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSymbolsParsing() {
+        // given
+        String inputSource = ":test";
+        Tokenizer tokenizer = new JNITokenizer();
+        var expected = Arrays.asList(
+                new SourceToken(TokenType.symbol, new TokenLocation(0, 0, 0, 5))
         );
 
         // when

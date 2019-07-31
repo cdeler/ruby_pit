@@ -18,6 +18,7 @@ public class LineTextHighlighter extends BaseTextHighlighter {
 
     public LineTextHighlighter(Tokenizer tokenizer, UISettingsManager settingManager) {
         super(tokenizer, settingManager);
+        LOGGER.warn("LineTextHighlighter doesn't fully support text highlighting");
     }
 
     @Override
