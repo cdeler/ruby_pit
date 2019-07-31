@@ -24,7 +24,7 @@ public class UISettings {
         result.tokenStyle = Arrays.stream(TokenType.values())
                 .collect(Collectors.toMap(
                         it -> it,
-                        it -> new TokenStyle("000000", false, false)
+                        it -> TokenStyle.getDefaultTokenStyle()
                 ));
 
         return result;

@@ -5,7 +5,7 @@
 
     <bean id="jni_tokenizer" class="cdeler.highlight.JNITokenizer"/>
 
-    <bean id="highlighter" class="cdeler.highlight.TextAreaHighlighter">
+    <bean id="highlighter" class="cdeler.highlight.StyleTextHighlighter">
         <constructor-arg index="0" ref="jni_tokenizer"/>
         <constructor-arg index="1" ref="settings_manager"/>
     </bean>
@@ -19,7 +19,7 @@
         <constructor-arg index="5" ref="settings_manager"/>
     </bean>
 
-    <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager" scope="singleton">
+    <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager">
         <constructor-arg index="0" value="settings"/>
     </bean>
 

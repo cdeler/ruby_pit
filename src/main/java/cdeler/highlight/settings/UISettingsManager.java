@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import cdeler.core.FontLoader;
+import cdeler.highlight.TokenType;
 
 
 public class UISettingsManager {
@@ -61,6 +62,12 @@ public class UISettingsManager {
         Optional<UISettings> settings = getSettingsByName(activeSettingsSet);
 
         return settings.orElse(UISettings.getDefaultSettings());
+    }
+
+    public TokenStyle getActiveStyleForTokenType(TokenType tokenType) {
+        var activeSettings = getActiveSettings();
+
+        return activeSettings.getTokenStyle().getOrDefault(tokenType, TokenStyle.getDefaultTokenStyle());
     }
 
     public Font getActiveFont() {
