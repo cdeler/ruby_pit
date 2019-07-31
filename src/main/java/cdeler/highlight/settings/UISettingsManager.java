@@ -12,7 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -32,12 +34,19 @@ public class UISettingsManager {
 
     private final Map<String, UISettings> settingMap;
     private final UISettings defaultSettings;
+    private final Set<TokenType> highlightedTokens;
     private volatile String activeSettingsSet;
 
-    public UISettingsManager(String settingsDirectoryPath, UISettings defaultSettings) {
+    public UISettingsManager(String settingsDirectoryPath, UISettings defaultSettings,
+                             Collection<TokenType> highlightedTokens) {
         this.defaultSettings = defaultSettings;
+        this.highlightedTokens = new HashSet<>(highlightedTokens);
         this.settingMap = loadSettings(settingsDirectoryPath, this.defaultSettings);
         this.activeSettingsSet = this.defaultSettings.getName();
+    }
+
+    public boolean isHighlightedToken(TokenType type) {
+        return (type != null) && highlightedTokens.contains(type);
     }
 
     private static Map<String, UISettings> loadSettings(String settingsPath, UISettings defaultSettings) {

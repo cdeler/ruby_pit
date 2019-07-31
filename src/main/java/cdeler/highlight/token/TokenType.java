@@ -1,7 +1,6 @@
 package cdeler.highlight.token;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public enum TokenType {
@@ -19,14 +18,6 @@ public enum TokenType {
             TokenType.symbol,
             TokenType.constant
     );
-
-    public static boolean isHighlightedToken(TokenType ttype) {
-        return (ttype != null) && HIGHLIGHTED_TOKENS.contains(ttype);
-    }
-
-    public static Collection<TokenType> getHighlightedTokens() {
-        return HIGHLIGHTED_TOKENS;
-    }
 
     public static TokenType getEnum(String val) {
         switch (val) {

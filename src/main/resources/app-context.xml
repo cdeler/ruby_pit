@@ -3,7 +3,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <bean id="jni_tokenizer" class="cdeler.highlight.token.JNITokenizer"/>
+    <bean id="jni_tokenizer" class="cdeler.highlight.token.JNITokenizer">
+        <constructor-arg name="manager" ref="settings_manager"/>
+    </bean>
 
     <bean id="highlighter" class="cdeler.highlight.highlighters.LineTextHighlighter">
         <constructor-arg name="tokenizer" ref="jni_tokenizer"/>
@@ -46,6 +48,19 @@
                     </map>
                 </constructor-arg>
             </bean>
+        </constructor-arg>
+        <constructor-arg name="highlightedTokens">
+            <list>
+                <bean class="cdeler.highlight.token.TokenType" factory-method="valueOf">
+                    <constructor-arg value="string"/>
+                </bean>
+                <bean class="cdeler.highlight.token.TokenType" factory-method="valueOf">
+                    <constructor-arg value="symbol"/>
+                </bean>
+                <bean class="cdeler.highlight.token.TokenType" factory-method="valueOf">
+                    <constructor-arg value="constant"/>
+                </bean>
+            </list>
         </constructor-arg>
     </bean>
 

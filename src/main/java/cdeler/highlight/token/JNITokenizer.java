@@ -8,9 +8,16 @@ import java.util.Optional;
 import org.scijava.nativelib.NativeLoader;
 
 import cdeler.highlight.HighlightException;
+import cdeler.highlight.settings.UISettingsManager;
 
 
 public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
+    private final UISettingsManager manager;
+
+    public JNITokenizer(UISettingsManager manager) {
+        this.manager = manager;
+    }
+
     static {
         try {
             NativeLoader.loadLibrary("rubypit");
@@ -36,7 +43,7 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
             var tokenData = data.get();
 
             tokenData.walk((token -> {
-                if (TokenType.isHighlightedToken(token.getTokenType())) {
+                if (manager.isHighlightedToken(token.getTokenType())) {
                     result.add(token);
                 }
 
