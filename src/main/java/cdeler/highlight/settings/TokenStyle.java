@@ -3,29 +3,21 @@ package cdeler.highlight.settings;
 import java.awt.*;
 
 import javax.swing.text.AttributeSet;
+import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 public class TokenStyle {
     private static final TokenStyle FALLBACK_TOKEN_STYLE = new TokenStyle("000000", false, false);
-    private static final AttributeSet FALLBACK_ATTRIBUTE_SET;
 
-    static {
-        var style = new SimpleAttributeSet();
-        StyleConstants.setItalic(style, FALLBACK_TOKEN_STYLE.isItalic());
-        StyleConstants.setBold(style, FALLBACK_TOKEN_STYLE.isBold());
-        StyleConstants.setForeground(style, FALLBACK_TOKEN_STYLE.getColor());
-        FALLBACK_ATTRIBUTE_SET = style;
-    }
+    private final boolean bold;
+    private final boolean italic;
+    private final Color color;
+    private final AttributeSet highlightedAttributeSet;
 
-    private boolean bold;
-    private boolean italic;
-    private Color color;
 
     public TokenStyle(String color, boolean bold, boolean italic) {
-        this.color = Color.decode(color);
-        this.bold = bold;
-        this.italic = italic;
+        this(Color.decode(color), bold, italic);
     }
 
     public TokenStyle(String color) {
@@ -36,6 +28,13 @@ public class TokenStyle {
         this.color = color;
         this.bold = bold;
         this.italic = italic;
+
+        MutableAttributeSet attributes = new SimpleAttributeSet();
+        attributes.addAttribute(StyleConstants.Foreground, this.color);
+        StyleConstants.setBold(attributes, this.bold);
+        StyleConstants.setItalic(attributes, this.italic);
+
+        this.highlightedAttributeSet = attributes;
     }
 
     public TokenStyle(Color color) {
@@ -58,7 +57,8 @@ public class TokenStyle {
         return FALLBACK_TOKEN_STYLE;
     }
 
-    public static AttributeSet getFallbackAttributeSet() {
-        return FALLBACK_ATTRIBUTE_SET;
+    public AttributeSet getHighlightedAttributeSet() {
+        return highlightedAttributeSet;
     }
+
 }

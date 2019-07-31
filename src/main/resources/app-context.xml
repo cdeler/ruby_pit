@@ -7,7 +7,7 @@
         <constructor-arg name="manager" ref="settings_manager"/>
     </bean>
 
-    <bean id="highlighter" class="cdeler.highlight.highlighters.LineTextHighlighter">
+    <bean id="highlighter" class="cdeler.highlight.highlighters.StyleTextHighlighter">
         <constructor-arg name="tokenizer" ref="jni_tokenizer"/>
         <constructor-arg name="settingManager" ref="settings_manager"/>
     </bean>
@@ -43,6 +43,15 @@
                         <entry key="constant">
                             <bean class="cdeler.highlight.settings.TokenStyle">
                                 <constructor-arg name="color" value="#CC8F16"/>
+                                <constructor-arg name="italic" value="false"/>
+                                <constructor-arg name="bold" value="true"/>
+                            </bean>
+                        </entry>
+                        <entry key="comment">
+                            <bean class="cdeler.highlight.settings.TokenStyle">
+                                <constructor-arg name="color" value="#CCCCCC"/>
+                                <constructor-arg name="italic" value="true"/>
+                                <constructor-arg name="bold" value="false"/>
                             </bean>
                         </entry>
                     </map>
@@ -59,6 +68,9 @@
                 </bean>
                 <bean class="cdeler.highlight.token.TokenType" factory-method="valueOf">
                     <constructor-arg value="constant"/>
+                </bean>
+                <bean class="cdeler.highlight.token.TokenType" factory-method="valueOf">
+                    <constructor-arg value="comment"/>
                 </bean>
             </list>
         </constructor-arg>

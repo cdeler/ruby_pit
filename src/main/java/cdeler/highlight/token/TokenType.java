@@ -11,6 +11,7 @@ public enum TokenType {
     program,
     method_call,
     argument_list,
+    comment,
     unknown;
 
     private static final List<TokenType> HIGHLIGHTED_TOKENS = Arrays.asList(
@@ -35,6 +36,8 @@ public enum TokenType {
                 return TokenType.method_call;
             case "argument_list":
                 return TokenType.argument_list;
+            case "comment":
+                return TokenType.comment;
             default:
                 return TokenType.unknown;
         }

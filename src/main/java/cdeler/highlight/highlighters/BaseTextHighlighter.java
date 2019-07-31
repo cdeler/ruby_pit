@@ -27,34 +27,37 @@ abstract class BaseTextHighlighter implements TextHighlighter {
 
         var tokens = tokenizer.harvest(textArea.getText());
 
-        // TODO we should rewrite only difference of parts of AST
-        clearHighlight(textArea);
-        tokens.forEach(sourceToken -> {
-            var location = sourceToken.getLocation();
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Location is " + location);
-            }
-
-            Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
-
-            if (textAreaRoot != null) {
-                var startOffset =
-                        textAreaRoot.getElement(location.beginLine).getStartOffset() + location.beginColumn;
-                var endOffset = textAreaRoot.getElement(location.endLine).getStartOffset() + location.endColumn;
+        // TODO we should clear only changed parts of AST
+        SwingUtilities.invokeLater(() -> {
+            clearHighlight(textArea);
+            tokens.forEach(sourceToken -> {
+                var location = sourceToken.getLocation();
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Highlighting node " + sourceToken.getTokenType()
-                            + " from " + startOffset + " to " + endOffset);
+                    LOGGER.debug("Location is " + location);
                 }
 
-                if (0 <= startOffset && startOffset < endOffset) {
-                    highlight(textArea, sourceToken.getTokenType(), startOffset, endOffset);
+                Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
+
+                if (textAreaRoot != null) {
+                    var startOffset =
+                            textAreaRoot.getElement(location.beginLine).getStartOffset() + location.beginColumn;
+                    var endOffset = textAreaRoot.getElement(location.endLine).getStartOffset() + location.endColumn;
+
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Highlighting node " + sourceToken.getTokenType()
+                                + " from " + startOffset + " to " + endOffset);
+                    }
+
+                    if (0 <= startOffset && startOffset < endOffset) {
+                        highlight(textArea, sourceToken.getTokenType(), startOffset, endOffset);
+                    }
                 }
-            }
+            });
+
+            LOGGER.debug("Leave highlight");
         });
 
-        LOGGER.debug("Leave highlight");
     }
 
     protected abstract void highlight(JTextPane textArea, TokenType tokenType, int startOffset, int endOffset);
