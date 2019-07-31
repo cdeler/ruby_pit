@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import cdeler.core.FontLoader;
-import cdeler.highlight.TokenType;
+import cdeler.highlight.token.TokenType;
 
 
 public class UISettingsManager {

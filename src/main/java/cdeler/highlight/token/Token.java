@@ -1,4 +1,4 @@
-package cdeler.highlight;
+package cdeler.highlight.token;
 
 public interface Token {
 

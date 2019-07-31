@@ -1,4 +1,4 @@
-package cdeler.highlight;
+package cdeler.highlight.token;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,7 +15,6 @@ public enum TokenType {
     unknown;
 
     private static final List<TokenType> HIGHLIGHTED_TOKENS = Arrays.asList(
-            identifier,
             string
     );
 

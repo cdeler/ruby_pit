@@ -1,4 +1,4 @@
-package cdeler.highlight;
+package cdeler.highlight.token;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.scijava.nativelib.NativeLoader;
+
+import cdeler.highlight.HighlightException;
 
 
 public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {

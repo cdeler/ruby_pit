@@ -1,4 +1,4 @@
-package cdeler.highlight;
+package cdeler.highlight.token;
 
 import cdeler.core.ui.UIUtils;
 

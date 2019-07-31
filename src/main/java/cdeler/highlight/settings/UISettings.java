@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import cdeler.highlight.TokenType;
+import cdeler.highlight.token.TokenType;
 
 public class UISettings {
     private static final String DEFAULT_SETTINGS_NAME = "default";
