@@ -13,21 +13,20 @@ import org.slf4j.LoggerFactory;
 import cdeler.core.FontLoader;
 import cdeler.core.ui.UIUtils;
 
-public class LineNumberedTextArea extends JTextArea {
+class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
     private static final int MIN_SYMBOL_WIDTH = 3;
 
     private final JTextPane textArea;
 
-    public LineNumberedTextArea(JTextPane textArea) {
+    LineNumberedTextArea(JTextPane textArea) {
         this.textArea = textArea;
         setBackground(Color.LIGHT_GRAY);
         setEditable(false);
         setFont(FontLoader.load("iosevka-regular", 20));
     }
 
-    public synchronized void highlightCaretPosition() {
-        //SwingUtilities.invokeLater(() -> {
+    synchronized void highlightCaretPosition() {
         try {
             Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
 
@@ -48,10 +47,9 @@ public class LineNumberedTextArea extends JTextArea {
         } catch (IndexOutOfBoundsException | BadLocationException e) {
             // LOGGER.error("Unable to highlight line numbers", e);
         }
-        //});
     }
 
-    public synchronized void updateLineNumbers() {
+    synchronized void updateLineNumbers() {
         int linesCount = textArea.getDocument().getDefaultRootElement().getElementCount();
 
         setText(UIUtils.formatLineNumbers(1, linesCount + 1, MIN_SYMBOL_WIDTH));
