@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 
 import cdeler.core.FontLoader;
 import cdeler.highlight.token.TokenType;
@@ -63,16 +65,21 @@ public class UISettingsManager {
         try (InputStream is = new FileInputStream(settingsFile.toFile());
              Reader reader = new BufferedReader(new InputStreamReader(is))) {
 
-            Gson gson = new Gson();
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(UISettings.class, new UISettings.UISettingSerializer());
+
+            Gson gson = gsonBuilder.create();
             Map<String, UISettings> settingsFromFile =
                     Arrays.stream(gson.fromJson(reader, UISettings[].class))
-                    .filter(it -> !defaultSettings.equals(it))
-                    .collect(Collectors.toMap(UISettings::getName, it -> it));
+                            .filter(it -> !defaultSettings.equals(it))
+                            .collect(Collectors.toMap(UISettings::getName, it -> it));
 
             result.putAll(settingsFromFile);
         } catch (FileNotFoundException e) {
             LOGGER.info("Unable to load settings from " + settingsFile);
             createDefaultSettingsFile(settingsFile);
+        } catch (JsonParseException e) {
+            LOGGER.error("Malformed settings file " + settingsFile, e);
         } catch (IOException e) {
             LOGGER.error("Unable to load settings from " + settingsFile, e);
         }
