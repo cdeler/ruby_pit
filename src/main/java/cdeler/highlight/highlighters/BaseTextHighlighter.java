@@ -28,35 +28,33 @@ abstract class BaseTextHighlighter implements TextHighlighter {
         var tokens = tokenizer.harvest(textArea.getText());
 
         // TODO we should clear only changed parts of AST
-        SwingUtilities.invokeLater(() -> {
-            clearHighlight(textArea);
-            tokens.forEach(sourceToken -> {
-                var location = sourceToken.getLocation();
+        clearHighlight(textArea);
+        tokens.forEach(sourceToken -> {
+            var location = sourceToken.getLocation();
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Location is " + location);
+            }
+
+            Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
+
+            if (textAreaRoot != null) {
+                var startOffset =
+                        textAreaRoot.getElement(location.beginLine).getStartOffset() + location.beginColumn;
+                var endOffset = textAreaRoot.getElement(location.endLine).getStartOffset() + location.endColumn;
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Location is " + location);
+                    LOGGER.debug("Highlighting node " + sourceToken.getTokenType()
+                            + " from " + startOffset + " to " + endOffset);
                 }
 
-                Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
-
-                if (textAreaRoot != null) {
-                    var startOffset =
-                            textAreaRoot.getElement(location.beginLine).getStartOffset() + location.beginColumn;
-                    var endOffset = textAreaRoot.getElement(location.endLine).getStartOffset() + location.endColumn;
-
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Highlighting node " + sourceToken.getTokenType()
-                                + " from " + startOffset + " to " + endOffset);
-                    }
-
-                    if (0 <= startOffset && startOffset < endOffset) {
-                        highlight(textArea, sourceToken.getTokenType(), startOffset, endOffset);
-                    }
+                if (0 <= startOffset && startOffset < endOffset) {
+                    highlight(textArea, sourceToken.getTokenType(), startOffset, endOffset);
                 }
-            });
-
-            LOGGER.debug("Leave highlight");
+            }
         });
+
+        LOGGER.debug("Leave highlight");
 
     }
 

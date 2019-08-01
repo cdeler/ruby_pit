@@ -1,0 +1,20 @@
+[
+  {
+    "name": "dark_theme",
+    "fontName": "iosevka-regular",
+    "fontSize": 20,
+    "tokenStyle": {
+      "symbol": {
+        "color": "#B3A76F"
+      },
+      "string": {
+        "color": "#FFF3B8"
+      },
+      "comment": {
+        "color": "#BAB8FF",
+        "bold": false,
+        "italic": true
+      }
+    }
+  }
+]

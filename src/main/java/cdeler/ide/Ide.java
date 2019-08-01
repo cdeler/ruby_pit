@@ -3,6 +3,7 @@ package cdeler.ide;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.ItemEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,8 +44,10 @@ public class Ide extends JFrame {
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
     private final EventThread<IOEventType> ioEventThread;
+    private final EventThread<UIEventType> highlightThread;
     private final TextHighlighter highlighter;
     private final UISettingsManager uiSettingsManager;
+    private final JComboBox themeChooseList;
 
     private volatile String fileName = null;
 
@@ -58,16 +61,20 @@ public class Ide extends JFrame {
         this.lineNumbers = new LineNumberedTextArea(textArea);
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
+        this.highlightThread = new EventThread<>();
         this.highlighter = highlighter;
         this.uiSettingsManager = uiSettingsManager;
 
+        themeChooseList = new JComboBox(uiSettingsManager.getAvailableSettings());
         uiInitialize();
 
         this.ioEventThread.addConsumers(getIOEventList());
         this.uiEventThread.addConsumers(getLineNumbersEventList());
+        this.highlightThread.addConsumers(getHighlightEvents());
 
-        new Thread(this.uiEventThread, "line_numbers_event_thread").start();
+        new Thread(this.uiEventThread, "ui_event_thread").start();
         new Thread(this.ioEventThread, "io_event_thread").start();
+        new Thread(this.highlightThread, "highlight_thread").start();
 
         LOGGER.info("Ide is initialized");
     }
@@ -121,10 +128,23 @@ public class Ide extends JFrame {
             LOGGER.error("Save button pressed");
         });
 
+        if (uiSettingsManager.getAvailableSettings().length > 1) {
+            themeChooseList.setSelectedIndex(0);
+            themeChooseList.addItemListener(itemEvent -> {
+                if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
+                    LOGGER.info("Selected theme " + itemEvent.getItem());
+                    uiSettingsManager.setActiveSettingsSet((String) itemEvent.getItem());
+
+                    highlightThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
+                }
+            });
+        }
+
         var topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
         topPanel.add(openButton);
         topPanel.add(saveButton);
+        topPanel.add(themeChooseList);
 
         textPanel.add(scrollPane);
 
@@ -146,13 +166,17 @@ public class Ide extends JFrame {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("insertUpdate");
-                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
+                var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
+                uiEventThread.fire(event);
+                highlightThread.fire(event);
             }
 
             @Override
             public void removeUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("removeUpdate");
-                uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
+                var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
+                uiEventThread.fire(event);
+                highlightThread.fire(event);
             }
 
             @Override
@@ -179,7 +203,10 @@ public class Ide extends JFrame {
                          var reader = new BufferedReader(new InputStreamReader(is))) {
 
                         textArea.setText(reader.lines().collect(Collectors.joining(System.lineSeparator())));
-                        uiEventThread.fire(new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED));
+
+                        var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
+                        uiEventThread.fire(event);
+                        highlightThread.fire(event);
 
                         fileName = inputFile.getAbsolutePath();
                     } catch (IOException e) {
@@ -195,13 +222,33 @@ public class Ide extends JFrame {
         return result;
     }
 
+    private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getHighlightEvents() {
+        Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
+        result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
+            highlighter.highlight(textArea);
+
+            return null;
+        });
+        result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
+            highlighter.highlight(textArea);
+
+            return null;
+        });
+        result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
+            highlighter.highlight(textArea);
+
+            return null;
+        });
+
+        return result;
+    }
+
     private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getLineNumbersEventList() {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
 
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
-            highlighter.highlight(textArea);
 
             return null;
         });
@@ -219,7 +266,6 @@ public class Ide extends JFrame {
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
-            highlighter.highlight(textArea);
 
             return null;
         });

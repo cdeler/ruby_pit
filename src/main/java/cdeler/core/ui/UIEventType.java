@@ -5,4 +5,5 @@ public enum UIEventType {
     CARET_UPDATE,
     WINDOW_RESIZE,
     UI_INITIALIZE,
+    REDRAW_HIGHLIGHT,
 }

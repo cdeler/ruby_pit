@@ -24,7 +24,7 @@
     <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager">
         <constructor-arg name="defaultSettings">
             <bean class="cdeler.highlight.settings.UISettings">
-                <constructor-arg name="name" value="default"/>
+                <constructor-arg name="name" value="default_theme"/>
                 <constructor-arg name="fontName" value="iosevka-regular"/>
                 <constructor-arg name="fontSize" value="20"/>
                 <constructor-arg name="tokenStyle">

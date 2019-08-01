@@ -10,10 +10,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -52,13 +54,17 @@ public class UISettingsManager {
         return (type != null) && highlightedTokens.contains(type);
     }
 
+    public synchronized void setActiveSettingsSet(String settingsSetName) {
+        activeSettingsSet = settingsSetName;
+    }
 
     private static Path getSettingsFile() {
         return Paths.get(System.getProperty("user.home"), SETTINGS_DIRECTORY_NAME, SETTINGS_FILE_NAME).toAbsolutePath();
     }
 
     private static Map<String, UISettings> loadSettings(UISettings defaultSettings) {
-        Map<String, UISettings> result = new HashMap<>();
+        // we need to preserve keys order of UISettingsManager#getAvailableSettings
+        Map<String, UISettings> result = new LinkedHashMap<>();
         result.put(defaultSettings.getName(), defaultSettings);
 
         Path settingsFile = getSettingsFile();
@@ -117,8 +123,10 @@ public class UISettingsManager {
         return Optional.ofNullable(settingMap.getOrDefault(settingName, null));
     }
 
-    public Set<String> getAvailableSettings() {
-        return settingMap.keySet();
+    public String[] getAvailableSettings() {
+        List<String> availableSettingsList = new ArrayList<>(settingMap.keySet());
+
+        return availableSettingsList.toArray(new String[0]);
     }
 
     public String getActiveSettingsSet() {
