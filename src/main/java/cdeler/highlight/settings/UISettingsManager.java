@@ -120,11 +120,11 @@ public class UISettingsManager {
         return FontLoader.load(activeSettings.getFontName(), activeSettings.getFontSize());
     }
 
-    public UISettings getDefaultSettings() {
+    private UISettings getDefaultSettings() {
         return settingMap.getOrDefault(defaultSettings.getName(), defaultSettings);
     }
 
-    public Optional<UISettings> getSettingsByName(String settingName) {
+    private Optional<UISettings> getSettingsByName(String settingName) {
         return Optional.ofNullable(settingMap.getOrDefault(settingName, null));
     }
 
@@ -132,10 +132,6 @@ public class UISettingsManager {
         List<String> availableSettingsList = new ArrayList<>(settingMap.keySet());
 
         return availableSettingsList.toArray(new String[0]);
-    }
-
-    public String getActiveSettingsSet() {
-        return activeSettingsSet;
     }
 
     public Color getActiveBackgroundColor() {
