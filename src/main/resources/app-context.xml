@@ -18,7 +18,7 @@
         <constructor-arg name="iconPath" value="/icons8-ruby-programming-language-64.png"/>
         <constructor-arg name="windowTitle" value="Ruby Pit"/>
         <constructor-arg name="highlighter" ref="highlighter"/>
-        <constructor-arg name="uiSettingsManager" ref="settings_manager"/>
+        <constructor-arg name="settingsManager" ref="settings_manager"/>
     </bean>
 
     <bean id="settings_manager" class="cdeler.highlight.settings.UISettingsManager">
@@ -28,6 +28,7 @@
                 <constructor-arg name="fontName" value="iosevka-regular"/>
                 <constructor-arg name="fontSize" value="20"/>
                 <constructor-arg name="backgroundColor" value="#FDF6E3"/>
+                <constructor-arg name="lineNumberColor" value="#1F4662"/>
                 <constructor-arg name="defaultFontSettings">
                     <bean class="cdeler.highlight.settings.TokenStyle">
                         <constructor-arg name="color" value="#657b83"/>

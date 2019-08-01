@@ -143,4 +143,9 @@ public class UISettingsManager {
         var activeSettings = getActiveSettings();
         return activeSettings.getBackgroundColor();
     }
+
+    public Color getActiveLineHighlightColor() {
+        var activeSettings = getActiveSettings();
+        return activeSettings.getLineNumberColor();
+    }
 }

@@ -7,8 +7,9 @@
     "fontName": "iosevka-regular",
     "fontSize": 20,
     "backgroundColor": "#193549",
+    "lineNumberColor": "#d6d5d3",
     "defaultFontSettings": {
-      "color": "#FEFFE3"
+      "color": "#FFFFFF"
     },
     "tokenStyle": {
       "symbol": {

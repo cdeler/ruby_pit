@@ -24,16 +24,19 @@ public class UISettings {
     private static final String DEFAULT_FONT_NAME = "iosevka-regular";
     private static final int DEFAULT_FONT_SIZE = 20;
     private static final String DEFAULT_BACKGROUND_COLOR = "#FFFFFF";
+    private static final String DEFAULT_LINE_NUMBER_COLOR = "#FFFF00";
 
     private final String name;
     private final String fontName;
     private final int fontSize;
     private final Color backgroundColor;
+    private final Color lineNumberColor;
     private final TokenStyle defaultFontSettings;
     private final Map<TokenType, TokenStyle> tokenStyle;
 
     public UISettings(String name, String fontName, int fontSize,
                       String backgroundColor,
+                      String lineNumberColor,
                       TokenStyle defaultFontSettings,
                       Map<TokenType, TokenStyle> tokenStyle) {
         this.name = name;
@@ -41,6 +44,7 @@ public class UISettings {
         this.fontSize = fontSize;
         this.defaultFontSettings = defaultFontSettings;
         this.backgroundColor = Color.decode(backgroundColor);
+        this.lineNumberColor = Color.decode(lineNumberColor);
 
         this.tokenStyle = tokenStyle;
     }
@@ -80,6 +84,10 @@ public class UISettings {
 
     public TokenStyle getDefaultFontSettings() {
         return defaultFontSettings;
+    }
+
+    public Color getLineNumberColor() {
+        return lineNumberColor;
     }
 
     public static class UISettingSerializer implements JsonDeserializer<UISettings> {
@@ -122,6 +130,7 @@ public class UISettings {
             TokenStyle defaultFontSettings = deserializeTokenStyle(jsonObject.getAsJsonObject("defaultFontSettings"))
                     .orElse(TokenStyle.getFallbackTokenStyle());
             String backgroundColor = getStringValueSave(jsonObject, "backgroundColor").orElse(DEFAULT_BACKGROUND_COLOR);
+            String lineNumberColor = getStringValueSave(jsonObject, "lineNumberColor").orElse(DEFAULT_LINE_NUMBER_COLOR);
             String fontName = getStringValueSave(jsonObject, "fontName").orElse(DEFAULT_FONT_NAME);
             int fontSize = getIntValueSave(jsonObject, "fontSize").orElse(DEFAULT_FONT_SIZE);
 
@@ -143,7 +152,8 @@ public class UISettings {
                 }
             }
 
-            return new UISettings(name, fontName, fontSize, backgroundColor, defaultFontSettings, tokenStyles);
+            return new UISettings(name, fontName, fontSize, backgroundColor, lineNumberColor, defaultFontSettings,
+                    tokenStyles);
         }
 
         private static Optional<Boolean> getBooleanValueSave(JsonObject object, String key) {

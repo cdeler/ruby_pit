@@ -1,7 +1,5 @@
 package cdeler.ide;
 
-import java.awt.*;
-
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -10,20 +8,30 @@ import javax.swing.text.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cdeler.core.FontLoader;
 import cdeler.core.ui.UIUtils;
+import cdeler.highlight.settings.UISettingsManager;
 
 class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
     private static final int MIN_SYMBOL_WIDTH = 3;
 
     private final JTextPane textArea;
+    private final UISettingsManager settingsManager;
 
-    LineNumberedTextArea(JTextPane textArea) {
+    LineNumberedTextArea(UISettingsManager uiSettingsManager, JTextPane textArea) {
         this.textArea = textArea;
-        setBackground(Color.LIGHT_GRAY);
+        this.settingsManager = uiSettingsManager;
+
+        setBackground(settingsManager.getDefaultActiveStyle().getColor());
+        setForeground(settingsManager.getActiveBackgroundColor());
+
         setEditable(false);
-        setFont(FontLoader.load("iosevka-regular", 20));
+        setFont(uiSettingsManager.getActiveFont());
+    }
+
+    synchronized void updateColors() {
+        setForeground(settingsManager.getActiveBackgroundColor());
+        setBackground(settingsManager.getDefaultActiveStyle().getColor());
     }
 
     synchronized void highlightCaretPosition() {
@@ -42,7 +50,7 @@ class LineNumberedTextArea extends JTextArea {
                 getHighlighter().addHighlight(
                         startHighlightOffset,
                         endHighlightOffset,
-                        new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
+                        new DefaultHighlighter.DefaultHighlightPainter(settingsManager.getActiveLineHighlightColor()));
             }
         } catch (IndexOutOfBoundsException | BadLocationException e) {
             // LOGGER.error("Unable to highlight line numbers", e);

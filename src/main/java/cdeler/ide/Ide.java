@@ -27,7 +27,6 @@ import cdeler.core.Event;
 import cdeler.core.EventThread;
 import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
-import cdeler.core.ui.UIUtils;
 import cdeler.highlight.highlighters.TextHighlighter;
 import cdeler.highlight.settings.UISettingsManager;
 
@@ -47,26 +46,26 @@ public class Ide extends JFrame {
     private final EventThread<IOEventType> ioEventThread;
     private final EventThread<UIEventType> highlightThread;
     private final TextHighlighter highlighter;
-    private final UISettingsManager uiSettingsManager;
+    private final UISettingsManager settingsManager;
     private final JComboBox themeChooseList;
 
     private volatile String fileName = null;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
-               TextHighlighter highlighter, UISettingsManager uiSettingsManager) {
+               TextHighlighter highlighter, UISettingsManager settingsManager) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
         this.windowTitle = windowTitle;
         this.textArea = new JTextPane(new DefaultStyledDocument());
-        this.lineNumbers = new LineNumberedTextArea(textArea);
+        this.lineNumbers = new LineNumberedTextArea(settingsManager, textArea);
         this.uiEventThread = new EventThread<>();
         this.ioEventThread = new EventThread<>();
         this.highlightThread = new EventThread<>();
         this.highlighter = highlighter;
-        this.uiSettingsManager = uiSettingsManager;
+        this.settingsManager = settingsManager;
 
-        themeChooseList = new JComboBox(uiSettingsManager.getAvailableSettings());
+        themeChooseList = new JComboBox(settingsManager.getAvailableSettings());
         uiInitialize();
 
         this.ioEventThread.addConsumers(getIOEventList());
@@ -133,17 +132,21 @@ public class Ide extends JFrame {
             LOGGER.error("Save button pressed");
         });
 
-        if (uiSettingsManager.getAvailableSettings().length > 1) {
+        if (settingsManager.getAvailableSettings().length > 1) {
             themeChooseList.setSelectedIndex(0);
             themeChooseList.addItemListener(itemEvent -> {
                 if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
                     LOGGER.info("Selected theme " + itemEvent.getItem());
-                    uiSettingsManager.setActiveSettingsSet((String) itemEvent.getItem());
+                    settingsManager.setActiveSettingsSet((String) itemEvent.getItem());
 
-                    UIUtils.changeTextPaneAttributes(textArea,
-                            uiSettingsManager.getDefaultActiveStyle().asAttributeSet());
-                    textArea.setBackground(uiSettingsManager.getActiveBackgroundColor());
+                    // change BG and text colors
+                    //UIUtils.changeTextPaneAttributes(textArea,
+                    //        settingsManager.getDefaultActiveStyle().asAttributeSet());
+                    textArea.setBackground(settingsManager.getActiveBackgroundColor());
+                    textArea.setForeground(settingsManager.getDefaultActiveStyle().getColor());
+
                     highlightThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
+                    uiEventThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
                 }
             });
         }
@@ -167,8 +170,8 @@ public class Ide extends JFrame {
     private void initializeTextArea() {
         textArea.setEditable(true);
         textArea.setEditorKit(new NoWrappingEditorKit());
-        textArea.setFont(uiSettingsManager.getActiveFont());
-        textArea.setBackground(uiSettingsManager.getActiveBackgroundColor());
+        textArea.setFont(settingsManager.getActiveFont());
+        textArea.setBackground(settingsManager.getActiveBackgroundColor());
 
         textArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -273,6 +276,12 @@ public class Ide extends JFrame {
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
             lineNumbers.updateLineNumbers();
+            lineNumbers.highlightCaretPosition();
+
+            return null;
+        });
+        result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
+            lineNumbers.updateColors();
             lineNumbers.highlightCaretPosition();
 
             return null;
