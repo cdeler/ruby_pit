@@ -27,6 +27,7 @@ import cdeler.core.Event;
 import cdeler.core.EventThread;
 import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
+import cdeler.core.ui.UIUtils;
 import cdeler.highlight.highlighters.TextHighlighter;
 import cdeler.highlight.settings.UISettingsManager;
 
@@ -139,6 +140,8 @@ public class Ide extends JFrame {
                     LOGGER.info("Selected theme " + itemEvent.getItem());
                     uiSettingsManager.setActiveSettingsSet((String) itemEvent.getItem());
 
+                    UIUtils.changeTextPaneAttributes(textArea,
+                            uiSettingsManager.getDefaultActiveStyle().asAttributeSet());
                     textArea.setBackground(uiSettingsManager.getActiveBackgroundColor());
                     highlightThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
                 }

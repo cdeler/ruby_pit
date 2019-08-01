@@ -6,6 +6,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.swing.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.Element;
+import javax.swing.text.StyledDocument;
+
 import cdeler.core.Pair;
 
 public class UIUtils {
@@ -64,6 +69,17 @@ public class UIUtils {
             seed ^= (0x9e3779b9 + (it << 6) + (it >> 2));
         }
         return seed;
+    }
+
+    public static void changeTextPaneAttributes(JTextPane textArea, AttributeSet newTextAttributes) {
+        StyledDocument document = textArea.getStyledDocument();
+        Element textAreaRoot = document.getDefaultRootElement();
+        int length = textAreaRoot.getEndOffset() - textAreaRoot.getStartOffset();
+
+        if (length >= 0) {
+            document.setCharacterAttributes(0, textArea.getText().length(), newTextAttributes, true);
+        }
+
     }
 
 }

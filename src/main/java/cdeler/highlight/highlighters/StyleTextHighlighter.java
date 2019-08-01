@@ -2,12 +2,12 @@ package cdeler.highlight.highlighters;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.Element;
 import javax.swing.text.StyledDocument;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cdeler.core.ui.UIUtils;
 import cdeler.highlight.settings.UISettingsManager;
 import cdeler.highlight.token.TokenType;
 import cdeler.highlight.token.Tokenizer;
@@ -21,14 +21,7 @@ class StyleTextHighlighter extends BaseTextHighlighter {
 
     @Override
     protected void clearHighlight(JTextPane textArea) {
-        StyledDocument document = textArea.getStyledDocument();
-        Element textAreaRoot = document.getDefaultRootElement();
-        int length = textAreaRoot.getEndOffset() - textAreaRoot.getStartOffset();
-
-        if (length >= 0) {
-            document.setCharacterAttributes(0, textArea.getText().length(),
-                    settingsManager.getDefaultActiveStyle().asAttributeSet(), true);
-        }
+        UIUtils.changeTextPaneAttributes(textArea, settingsManager.getDefaultActiveStyle().asAttributeSet());
     }
 
     @Override

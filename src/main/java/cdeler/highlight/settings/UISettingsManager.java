@@ -58,8 +58,14 @@ public class UISettingsManager {
         highlightedTokens = new HashSet<>(getActiveSettings().getTokenStyle().keySet());
     }
 
-    private static Path getSettingsFile() {
-        return Paths.get(System.getProperty("user.home"), SETTINGS_DIRECTORY_NAME, SETTINGS_FILE_NAME).toAbsolutePath();
+    static InputStream getSettingsFileInputStream() throws FileNotFoundException {
+        Path settingsFile =
+                Paths.get(System.getProperty("user.home"),
+                        SETTINGS_DIRECTORY_NAME,
+                        SETTINGS_FILE_NAME).toAbsolutePath();
+        LOGGER.info("Loading themes from " + settingsFile);
+
+        return new FileInputStream(settingsFile.toFile());
     }
 
     private static Map<String, UISettings> loadSettings(UISettings defaultSettings) {
@@ -67,8 +73,7 @@ public class UISettingsManager {
         Map<String, UISettings> result = new LinkedHashMap<>();
         result.put(defaultSettings.getName(), defaultSettings);
 
-        Path settingsFile = getSettingsFile();
-        try (InputStream is = new FileInputStream(settingsFile.toFile());
+        try (InputStream is = getSettingsFileInputStream();
              Reader reader = new BufferedReader(new InputStreamReader(is))) {
 
             GsonBuilder gsonBuilder = new GsonBuilder();
@@ -82,19 +87,19 @@ public class UISettingsManager {
 
             result.putAll(settingsFromFile);
         } catch (FileNotFoundException e) {
-            LOGGER.info("Unable to load settings from " + settingsFile);
-            createDefaultSettingsFile(settingsFile);
+            LOGGER.info("Unable to load settings from settings file", e);
+            createDefaultSettingsFile();
         } catch (JsonParseException e) {
-            LOGGER.error("Malformed settings file " + settingsFile, e);
+            LOGGER.error("Malformed settings file", e);
         } catch (IOException e) {
-            LOGGER.error("Unable to load settings from " + settingsFile, e);
+            LOGGER.error("Unable to load settings file", e);
         }
 
         return result;
     }
 
-    private static void createDefaultSettingsFile(Path settingsFile) {
-        LOGGER.info("createDefaultSettingsFile(" + settingsFile + ") is not implemented");
+    private static void createDefaultSettingsFile() {
+        LOGGER.info("createDefaultSettingsFile() is not implemented");
     }
 
     private UISettings getActiveSettings() {
