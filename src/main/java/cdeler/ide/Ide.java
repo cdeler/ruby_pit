@@ -76,6 +76,10 @@ public class Ide extends JFrame {
         new Thread(this.ioEventThread, "io_event_thread").start();
         new Thread(this.highlightThread, "highlight_thread").start();
 
+
+        var initializeCompleted = new Event<>(UIEventType.UI_INITIALIZE);
+        uiEventThread.fire(initializeCompleted);
+        highlightThread.fire(initializeCompleted);
         LOGGER.info("Ide is initialized");
     }
 
@@ -135,6 +139,7 @@ public class Ide extends JFrame {
                     LOGGER.info("Selected theme " + itemEvent.getItem());
                     uiSettingsManager.setActiveSettingsSet((String) itemEvent.getItem());
 
+                    textArea.setBackground(uiSettingsManager.getActiveBackgroundColor());
                     highlightThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
                 }
             });
@@ -157,10 +162,10 @@ public class Ide extends JFrame {
     }
 
     private void initializeTextArea() {
-        textArea.setMinimumSize(new Dimension(800, 600));
         textArea.setEditable(true);
         textArea.setEditorKit(new NoWrappingEditorKit());
         textArea.setFont(uiSettingsManager.getActiveFont());
+        textArea.setBackground(uiSettingsManager.getActiveBackgroundColor());
 
         textArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override

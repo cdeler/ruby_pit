@@ -109,6 +109,11 @@ public class UISettingsManager {
         return activeSettings.getTokenStyle().getOrDefault(tokenType, TokenStyle.getFallbackTokenStyle());
     }
 
+    public TokenStyle getDefaultActiveStyle() {
+        var activeSettings = getActiveSettings();
+        return activeSettings.getDefaultFontSettings();
+    }
+
     public Font getActiveFont() {
         var activeSettings = getActiveSettings();
 
@@ -131,5 +136,10 @@ public class UISettingsManager {
 
     public String getActiveSettingsSet() {
         return activeSettingsSet;
+    }
+
+    public Color getActiveBackgroundColor() {
+        var activeSettings = getActiveSettings();
+        return activeSettings.getBackgroundColor();
     }
 }

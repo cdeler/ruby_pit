@@ -1,8 +1,5 @@
 package cdeler.highlight.token;
 
-import java.util.Arrays;
-import java.util.List;
-
 public enum TokenType {
     identifier,
     string,
@@ -13,12 +10,6 @@ public enum TokenType {
     argument_list,
     comment,
     unknown;
-
-    private static final List<TokenType> HIGHLIGHTED_TOKENS = Arrays.asList(
-            TokenType.string,
-            TokenType.symbol,
-            TokenType.constant
-    );
 
     public static TokenType getEnum(String val) {
         switch (val) {

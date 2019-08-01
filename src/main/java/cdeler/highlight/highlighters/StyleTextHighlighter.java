@@ -1,12 +1,8 @@
 package cdeler.highlight.highlighters;
 
-import java.awt.*;
-
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 import org.slf4j.Logger;
@@ -19,15 +15,8 @@ import cdeler.highlight.token.Tokenizer;
 class StyleTextHighlighter extends BaseTextHighlighter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleTextHighlighter.class);
 
-    private final AttributeSet blackAttributeSet;
-
     public StyleTextHighlighter(Tokenizer tokenizer, UISettingsManager settingManager) {
         super(tokenizer, settingManager);
-
-        StyleContext styleContext = StyleContext.getDefaultStyleContext();
-        blackAttributeSet = styleContext.addAttribute(styleContext.getEmptySet(),
-                StyleConstants.Foreground,
-                Color.BLACK);
     }
 
     @Override
@@ -37,14 +26,15 @@ class StyleTextHighlighter extends BaseTextHighlighter {
         int length = textAreaRoot.getEndOffset() - textAreaRoot.getStartOffset();
 
         if (length >= 0) {
-            document.setCharacterAttributes(0, textArea.getText().length(), blackAttributeSet, true);
+            document.setCharacterAttributes(0, textArea.getText().length(),
+                    settingsManager.getDefaultActiveStyle().asAttributeSet(), true);
         }
     }
 
     @Override
     protected void highlight(JTextPane textArea, TokenType tokenType, int startOffset, int endOffset) {
         StyledDocument document = textArea.getStyledDocument();
-        AttributeSet attributes = settingsManager.getActiveStyleForTokenType(tokenType).getHighlightedAttributeSet();
+        AttributeSet attributes = settingsManager.getActiveStyleForTokenType(tokenType).asAttributeSet();
 
         document.setCharacterAttributes(startOffset, endOffset - startOffset, attributes, false);
     }

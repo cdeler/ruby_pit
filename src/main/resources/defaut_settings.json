@@ -1,19 +1,29 @@
 [
   {
-    "name": "dark_theme",
+    "name": "cobalt2_theme",
+    "comments": {
+      "taken_from": "https://github.com/wesbos/cobalt2-vscode/blob/master/theme/cobalt2.json"
+    },
     "fontName": "iosevka-regular",
     "fontSize": 20,
+    "backgroundColor": "#193549",
+    "defaultFontSettings": {
+      "color": "#FEFFE3"
+    },
     "tokenStyle": {
       "symbol": {
-        "color": "#B3A76F"
+        "color": "#FFF6C9"
       },
       "string": {
-        "color": "#FFF3B8"
+        "color": "#A5FF90"
       },
       "comment": {
-        "color": "#BAB8FF",
-        "bold": false,
+        "color": "#0088FF",
         "italic": true
+      },
+      "constant": {
+        "color": "#FF628C",
+        "bold": true
       }
     }
   }

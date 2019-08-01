@@ -1,5 +1,6 @@
 package cdeler.highlight.settings;
 
+import java.awt.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,16 +23,25 @@ public class UISettings {
     private static final Logger LOGGER = LoggerFactory.getLogger(UISettings.class);
     private static final String DEFAULT_FONT_NAME = "iosevka-regular";
     private static final int DEFAULT_FONT_SIZE = 20;
+    private static final String DEFAULT_BACKGROUND_COLOR = "#FFFFFF";
 
     private final String name;
     private final String fontName;
     private final int fontSize;
+    private final Color backgroundColor;
+    private final TokenStyle defaultFontSettings;
     private final Map<TokenType, TokenStyle> tokenStyle;
 
-    public UISettings(String name, String fontName, int fontSize, Map<TokenType, TokenStyle> tokenStyle) {
+    public UISettings(String name, String fontName, int fontSize,
+                      String backgroundColor,
+                      TokenStyle defaultFontSettings,
+                      Map<TokenType, TokenStyle> tokenStyle) {
         this.name = name;
         this.fontName = fontName;
         this.fontSize = fontSize;
+        this.defaultFontSettings = defaultFontSettings;
+        this.backgroundColor = Color.decode(backgroundColor);
+
         this.tokenStyle = tokenStyle;
     }
 
@@ -46,6 +56,10 @@ public class UISettings {
         }
 
         return Objects.equals(((UISettings) obj).getName(), getName());
+    }
+
+    public Color getBackgroundColor() {
+        return backgroundColor;
     }
 
     public String getName() {
@@ -64,6 +78,10 @@ public class UISettings {
         return tokenStyle;
     }
 
+    public TokenStyle getDefaultFontSettings() {
+        return defaultFontSettings;
+    }
+
     public static class UISettingSerializer implements JsonDeserializer<UISettings> {
 
         @Override
@@ -75,12 +93,35 @@ public class UISettings {
             }
         }
 
+        private static Optional<TokenStyle> deserializeTokenStyle(JsonObject tokenStylesObject) {
+            try {
+                Optional<String> color = getStringValueSave(tokenStylesObject, "color");
+
+                Optional<Boolean> bold = getBooleanValueSave(tokenStylesObject, "bold");
+                Optional<Boolean> italic = getBooleanValueSave(tokenStylesObject, "italic");
+
+                return Optional.of(
+                        new TokenStyle(color.orElse(TokenStyle.getDefaultFontColor()),
+                                bold.orElse(false),
+                                italic.orElse(false))
+                );
+
+
+            } catch (ClassCastException | IllegalStateException | NoSuchElementException | NullPointerException e) {
+
+            }
+
+            return Optional.empty();
+        }
+
         private UISettings deserializeInternal(JsonElement json) {
             JsonObject jsonObject = json.getAsJsonObject();
 
             // name is required field in settings file
             String name = getStringValueSave(jsonObject, "name").orElseThrow();
-
+            TokenStyle defaultFontSettings = deserializeTokenStyle(jsonObject.getAsJsonObject("defaultFontSettings"))
+                    .orElse(TokenStyle.getFallbackTokenStyle());
+            String backgroundColor = getStringValueSave(jsonObject, "backgroundColor").orElse(DEFAULT_BACKGROUND_COLOR);
             String fontName = getStringValueSave(jsonObject, "fontName").orElse(DEFAULT_FONT_NAME);
             int fontSize = getIntValueSave(jsonObject, "fontSize").orElse(DEFAULT_FONT_SIZE);
 
@@ -90,17 +131,10 @@ public class UISettings {
             for (var tokenStyle : tokenStylesObject.entrySet()) {
                 try {
                     TokenType tokenName = TokenType.getEnum(tokenStyle.getKey());
+                    Optional<TokenStyle> style = deserializeTokenStyle(tokenStyle.getValue().getAsJsonObject());
 
                     if (tokenName != TokenType.unknown) {
-                        JsonObject tokenStyleObject = tokenStyle.getValue().getAsJsonObject();
-
-                        Optional<String> color = getStringValueSave(tokenStyleObject, "color");
-
-                        Optional<Boolean> bold = getBooleanValueSave(tokenStyleObject, "bold");
-                        Optional<Boolean> italic = getBooleanValueSave(tokenStyleObject, "italic");
-
-                        tokenStyles.put(tokenName,
-                                new TokenStyle(color.orElseThrow(), bold.orElse(false), italic.orElse(false)));
+                        tokenStyles.put(tokenName, style.orElseThrow());
                     } else {
                         LOGGER.error("Unknown token type " + tokenStyle.getKey());
                     }
@@ -109,7 +143,7 @@ public class UISettings {
                 }
             }
 
-            return new UISettings(name, fontName, fontSize, tokenStyles);
+            return new UISettings(name, fontName, fontSize, backgroundColor, defaultFontSettings, tokenStyles);
         }
 
         private static Optional<Boolean> getBooleanValueSave(JsonObject object, String key) {

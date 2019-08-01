@@ -8,7 +8,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 public class TokenStyle {
-    private static final TokenStyle FALLBACK_TOKEN_STYLE = new TokenStyle("000000", false, false);
+    private static final String DEFAULT_FONT_COLOR = "#000000";
+    private static final TokenStyle FALLBACK_TOKEN_STYLE = new TokenStyle("#000000", false, false);
 
     private final boolean bold;
     private final boolean italic;
@@ -57,8 +58,11 @@ public class TokenStyle {
         return FALLBACK_TOKEN_STYLE;
     }
 
-    public AttributeSet getHighlightedAttributeSet() {
+    public AttributeSet asAttributeSet() {
         return highlightedAttributeSet;
     }
 
+    public static String getDefaultFontColor() {
+        return DEFAULT_FONT_COLOR;
+    }
 }
