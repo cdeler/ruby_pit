@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,14 +38,14 @@ public class UISettingsManager {
 
     private final Map<String, UISettings> settingMap;
     private final UISettings defaultSettings;
-    private final Set<TokenType> highlightedTokens;
+    private volatile Set<TokenType> highlightedTokens;
     private volatile String activeSettingsSet;
 
-    public UISettingsManager(UISettings defaultSettings,
-                             Collection<TokenType> highlightedTokens) {
+    public UISettingsManager(UISettings defaultSettings) {
         this.defaultSettings = defaultSettings;
-        this.highlightedTokens = new HashSet<>(highlightedTokens);
         this.settingMap = loadSettings(this.defaultSettings);
+        this.highlightedTokens = new HashSet<>(getActiveSettings().getTokenStyle().keySet());
+
         this.activeSettingsSet = this.defaultSettings.getName();
     }
 
@@ -56,6 +55,7 @@ public class UISettingsManager {
 
     public synchronized void setActiveSettingsSet(String settingsSetName) {
         activeSettingsSet = settingsSetName;
+        highlightedTokens = new HashSet<>(getActiveSettings().getTokenStyle().keySet());
     }
 
     private static Path getSettingsFile() {
