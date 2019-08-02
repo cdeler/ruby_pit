@@ -136,7 +136,7 @@ public class Ide extends JFrame {
             themeChooseList.setSelectedIndex(0);
             themeChooseList.addItemListener(itemEvent -> {
                 if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
-                    LOGGER.info("Selected theme " + itemEvent.getItem());
+                    LOGGER.info("Selected theme {}", itemEvent.getItem());
                     settingsManager.setActiveSettingsSet((String) itemEvent.getItem());
 
                     // change BG and text colors

@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,16 +60,20 @@ public class UISettingsManager {
         highlightedTokens = new HashSet<>(getActiveSettings().getTokenStyle().keySet());
     }
 
+    @NotNull
+    @Contract(" -> new")
     static InputStream getSettingsFileInputStream() throws FileNotFoundException {
         Path settingsFile =
                 Paths.get(System.getProperty("user.home"),
                         SETTINGS_DIRECTORY_NAME,
                         SETTINGS_FILE_NAME).toAbsolutePath();
-        LOGGER.info("Loading themes from " + settingsFile);
+        LOGGER.info("Loading themes from {}", settingsFile);
 
         return new FileInputStream(settingsFile.toFile());
     }
 
+    @NotNull
+    @Contract("_ -> new")
     private static Map<String, UISettings> loadSettings(UISettings defaultSettings) {
         // we need to preserve keys order of UISettingsManager#getAvailableSettings
         Map<String, UISettings> result = new LinkedHashMap<>();
