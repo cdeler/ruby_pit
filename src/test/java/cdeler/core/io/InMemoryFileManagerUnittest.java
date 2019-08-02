@@ -105,4 +105,24 @@ public class InMemoryFileManagerUnittest {
         // then
         assertEquals(DEFAULT_FILE_CONTEXT, manager.getFileContent());
     }
+
+    @Test
+    public void testSaveOnNotExistsFile() throws IOException {
+        // given
+        FileManager manager = new InMemoryFileManager();
+        var text = Stream.of("123", "456", "678").collect(Collectors.joining(System.lineSeparator()));
+        var file = Files.createTempFile("testSaveOnNotExistsFile", ".tst");
+        Files.delete(file);
+        file.toFile().deleteOnExit();
+
+        // when
+        manager.write(text);
+        var hasBeenSaved = manager.saveFile(file, false);
+
+        // then
+        assertTrue(hasBeenSaved);
+        assertEquals(text, manager.getFileContent());
+        assertEquals(text, FileUtils.readFileToString(file.toFile()));
+
+    }
 }

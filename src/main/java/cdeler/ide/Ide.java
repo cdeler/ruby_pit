@@ -48,6 +48,8 @@ public class Ide extends JFrame {
     private final TextHighlighter highlighter;
     private final UISettingsManager settingsManager;
     private final JComboBox themeChooseList;
+    private final JButton saveButton;
+
 
     private volatile String fileName = null;
 
@@ -64,11 +66,12 @@ public class Ide extends JFrame {
         this.highlightThread = new EventThread<>();
         this.highlighter = highlighter;
         this.settingsManager = settingsManager;
+        this.saveButton = new JButton("\uD83D\uDCBE");
 
         themeChooseList = new JComboBox(settingsManager.getAvailableSettings());
         uiInitialize();
 
-        this.ioEventThread.addConsumers(getIOEventList());
+        this.ioEventThread.addConsumers(getOpenFileEvents());
         this.uiEventThread.addConsumers(getLineNumbersEventList());
         this.highlightThread.addConsumers(getHighlightEvents());
 
@@ -125,11 +128,6 @@ public class Ide extends JFrame {
         openButton.addActionListener(actionEvent -> {
             LOGGER.debug("Open button pressed");
             ioEventThread.fire(new Event<>(IOEventType.FILE_OPEN_EVENT));
-        });
-
-        var saveButton = new JButton("\uD83D\uDCBE");
-        saveButton.addActionListener(actionEvent -> {
-            LOGGER.error("Save button pressed");
         });
 
         if (settingsManager.getAvailableSettings().length > 1) {
@@ -198,7 +196,8 @@ public class Ide extends JFrame {
         textArea.addCaretListener(caretEvent -> uiEventThread.fire(new Event<>(UIEventType.CARET_UPDATE)));
     }
 
-    private Map<IOEventType, Function<List<Event<IOEventType>>, Void>> getIOEventList() {
+
+    private Map<IOEventType, Function<List<Event<IOEventType>>, Void>> getOpenFileEvents() {
         Map<IOEventType, Function<List<Event<IOEventType>>, Void>> result = new HashMap<>();
 
         result.put(IOEventType.FILE_OPEN_EVENT, uiEvent -> {
@@ -208,7 +207,7 @@ public class Ide extends JFrame {
                 synchronized (this) {
                     File inputFile = fileOpenDialog.getSelectedFile();
 
-                    LOGGER.info("Opening file " + inputFile.getAbsolutePath());
+                    LOGGER.info("Opening file {}", inputFile.getAbsolutePath());
 
                     try (var is = new FileInputStream(inputFile);
                          var reader = new BufferedReader(new InputStreamReader(is))) {
@@ -288,5 +287,13 @@ public class Ide extends JFrame {
         });
 
         return result;
+    }
+
+    JTextPane getTextArea() {
+        return textArea;
+    }
+
+    JButton getSaveButton() {
+        return saveButton;
     }
 }

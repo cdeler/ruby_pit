@@ -57,7 +57,7 @@ public class InMemoryFileManager implements FileManager {
     public synchronized boolean saveFile(@NotNull Path destFile, boolean override) throws IOException {
         boolean result = false;
 
-        if (Files.exists(destFile) && override) {
+        if (!Files.exists(destFile) || override) {
             try (var is = new ByteArrayInputStream(fileDataStorage);
                  var os = new BufferedOutputStream(new FileOutputStream(destFile.toFile()))) {
                 IOUtils.copy(is, os);

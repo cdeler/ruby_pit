@@ -12,7 +12,7 @@ public class IdeMain extends JFrame {
         ApplicationContext context = new ClassPathXmlApplicationContext("/app-context.xml");
 
         EventQueue.invokeLater(() -> {
-            Ide ide = (Ide) context.getBean("main_application");
+            Ide ide = (Ide) context.getBean("ide_window");
 
             ide.setVisible(true);
         });
