@@ -24,6 +24,7 @@ import cdeler.core.Event;
 import cdeler.core.EventThread;
 import cdeler.core.io.FileManager;
 import cdeler.core.io.IOEventType;
+import cdeler.highlight.settings.UISettingsManager;
 
 public class IOEventsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(IOEventsManager.class);
@@ -35,16 +36,23 @@ public class IOEventsManager {
     private final JTextComponent textArea;
     @NotNull
     private final EventThread<IOEventType> ioEventsThread;
+    @NotNull
+    private final JFrame ide;
+    @NotNull
+    private final UISettingsManager settingsManager;
 
-    public IOEventsManager(@NotNull FileManager manager, @NotNull Ide ide) {
+    public IOEventsManager(@NotNull FileManager manager, @NotNull Ide ide, @NotNull UISettingsManager settingsManager) {
         this.manager = manager;
         this.textArea = ide.getTextArea();
+        this.ide = ide;
+        this.settingsManager = settingsManager;
+
         this.currentFile = null;
         this.ioEventsThread = new EventThread<>();
         this.ioEventsThread.addConsumers(getIOEvents());
         initializeEventListeners(ide);
 
-        new Thread(this.ioEventsThread, "io_events_thread2").start();
+        new Thread(this.ioEventsThread, "io_events_thread").start();
     }
 
     private Map<IOEventType, Function<List<Event<IOEventType>>, Void>> getIOEvents() {
@@ -84,12 +92,25 @@ public class IOEventsManager {
                     // highlightThread.fire(event);
 
                     currentFile = inputFile.getAbsoluteFile().toPath();
+
+                    ide.setTitle(getNewTitle(currentFile));
                 } catch (IOException e) {
                     LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
                 }
             }
         }
+    }
 
+    private String getNewTitle(@Nullable Path openedFile) {
+        if (openedFile != null) {
+            Path fileName = openedFile.getFileName();
+
+            if (fileName != null) {
+                return settingsManager.getIdeTitle() + " : " + fileName;
+            }
+        }
+
+        return settingsManager.getIdeTitle();
     }
 
     private void initializeEventListeners(@NotNull Ide ide) {

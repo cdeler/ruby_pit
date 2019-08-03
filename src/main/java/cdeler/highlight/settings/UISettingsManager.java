@@ -42,9 +42,11 @@ public class UISettingsManager {
     private final UISettings defaultSettings;
     private volatile Set<TokenType> highlightedTokens;
     private volatile String activeSettingsSet;
+    private final String ideTitle;
 
-    public UISettingsManager(UISettings defaultSettings) {
+    public UISettingsManager(UISettings defaultSettings, String ideTitle) {
         this.defaultSettings = defaultSettings;
+        this.ideTitle = ideTitle;
         this.settingMap = loadSettings(this.defaultSettings);
         this.highlightedTokens = new HashSet<>(getActiveSettings().getTokenStyle().keySet());
 
@@ -153,5 +155,9 @@ public class UISettingsManager {
     public Color getActiveLineHighlightColor() {
         var activeSettings = getActiveSettings();
         return activeSettings.getLineNumberColor();
+    }
+
+    public String getIdeTitle() {
+        return ideTitle;
     }
 }

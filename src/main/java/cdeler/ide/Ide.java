@@ -32,7 +32,6 @@ public class Ide extends JFrame {
     private int windowWidth;
     private int windowHeight;
     private String iconPath;
-    private String windowTitle;
     private final JTextPane textArea;
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
@@ -43,12 +42,11 @@ public class Ide extends JFrame {
     private final JButton saveButton;
     private final JButton openButton;
 
-    public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
+    public Ide(int windowWidth, int windowHeight, String iconPath,
                TextHighlighter highlighter, UISettingsManager settingsManager) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
-        this.windowTitle = windowTitle;
         this.textArea = new JTextPane(new DefaultStyledDocument());
         this.lineNumbers = new LineNumberedTextArea(settingsManager, textArea);
         this.uiEventThread = new EventThread<>();
@@ -77,7 +75,7 @@ public class Ide extends JFrame {
     private void uiInitialize() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        setTitle(windowTitle);
+        setTitle(settingsManager.getIdeTitle());
         setSize(windowWidth, windowHeight);
         setLocationRelativeTo(null);
 
@@ -121,8 +119,6 @@ public class Ide extends JFrame {
                     settingsManager.setActiveSettingsSet((String) itemEvent.getItem());
 
                     // change BG and text colors
-                    //UIUtils.changeTextPaneAttributes(textArea,
-                    //        settingsManager.getDefaultActiveStyle().asAttributeSet());
                     textArea.setBackground(settingsManager.getActiveBackgroundColor());
                     textArea.setForeground(settingsManager.getDefaultActiveStyle().getColor());
 
@@ -178,7 +174,6 @@ public class Ide extends JFrame {
 
         textArea.addCaretListener(caretEvent -> uiEventThread.fire(new Event<>(UIEventType.CARET_UPDATE)));
     }
-
 
     private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getHighlightEvents() {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();

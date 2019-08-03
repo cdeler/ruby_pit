@@ -3,6 +3,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="app.properties"/>
+    </bean>
+
     <bean id="jni_tokenizer" class="cdeler.highlight.token.JNITokenizer">
         <constructor-arg name="manager" ref="settings_manager"/>
     </bean>
@@ -12,20 +16,18 @@
         <constructor-arg name="settingManager" ref="settings_manager"/>
     </bean>
 
-
-    <bean id="save_file_handler" class="cdeler.ide.IOEventsManager">
+    <bean id="io_events_handler" class="cdeler.ide.IOEventsManager">
         <constructor-arg name="manager">
             <bean class="cdeler.core.io.InMemoryFileManager"/>
         </constructor-arg>
         <constructor-arg name="ide" ref="ide_window"/>
+        <constructor-arg name="settingsManager" ref="settings_manager"/>
     </bean>
-
 
     <bean id="ide_window" class="cdeler.ide.Ide">
         <constructor-arg name="windowWidth" value="800"/>
         <constructor-arg name="windowHeight" value="600"/>
         <constructor-arg name="iconPath" value="/icons8-ruby-programming-language-64.png"/>
-        <constructor-arg name="windowTitle" value="Ruby Pit"/>
         <constructor-arg name="highlighter" ref="highlighter"/>
         <constructor-arg name="settingsManager" ref="settings_manager"/>
     </bean>
@@ -73,6 +75,7 @@
                 </constructor-arg>
             </bean>
         </constructor-arg>
+        <constructor-arg name="ideTitle" value="${ide.default_ide_title}"/>
     </bean>
 
 </beans>
