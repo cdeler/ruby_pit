@@ -116,7 +116,7 @@ public class IOEventsManager {
     private void initializeEventListeners(@NotNull Ide ide) {
         var saveButton = ide.getSaveButton();
         saveButton.addActionListener(actionEvent -> {
-            LOGGER.error("Save button pressed");
+            LOGGER.debug("Save button pressed");
 
             ioEventsThread.fire(new Event<>(IOEventType.FILE_SAVE_EVENT));
         });
