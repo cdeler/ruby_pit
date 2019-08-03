@@ -4,16 +4,10 @@ import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -25,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import cdeler.core.Event;
 import cdeler.core.EventThread;
-import cdeler.core.io.IOEventType;
 import cdeler.core.ui.UIEventType;
 import cdeler.highlight.highlighters.TextHighlighter;
 import cdeler.highlight.settings.UISettingsManager;
@@ -43,15 +36,12 @@ public class Ide extends JFrame {
     private final JTextPane textArea;
     private final LineNumberedTextArea lineNumbers;
     private final EventThread<UIEventType> uiEventThread;
-    private final EventThread<IOEventType> ioEventThread;
     private final EventThread<UIEventType> highlightThread;
     private final TextHighlighter highlighter;
     private final UISettingsManager settingsManager;
     private final JComboBox themeChooseList;
     private final JButton saveButton;
-
-
-    private volatile String fileName = null;
+    private final JButton openButton;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, String windowTitle,
                TextHighlighter highlighter, UISettingsManager settingsManager) {
@@ -62,21 +52,19 @@ public class Ide extends JFrame {
         this.textArea = new JTextPane(new DefaultStyledDocument());
         this.lineNumbers = new LineNumberedTextArea(settingsManager, textArea);
         this.uiEventThread = new EventThread<>();
-        this.ioEventThread = new EventThread<>();
         this.highlightThread = new EventThread<>();
         this.highlighter = highlighter;
         this.settingsManager = settingsManager;
         this.saveButton = new JButton("\uD83D\uDCBE");
+        this.openButton = new JButton("\uD83D\uDCC2");
 
-        themeChooseList = new JComboBox(settingsManager.getAvailableSettings());
+        this.themeChooseList = new JComboBox(settingsManager.getAvailableSettings());
         uiInitialize();
 
-        this.ioEventThread.addConsumers(getOpenFileEvents());
         this.uiEventThread.addConsumers(getLineNumbersEventList());
         this.highlightThread.addConsumers(getHighlightEvents());
 
         new Thread(this.uiEventThread, "ui_event_thread").start();
-        new Thread(this.ioEventThread, "io_event_thread").start();
         new Thread(this.highlightThread, "highlight_thread").start();
 
 
@@ -124,11 +112,6 @@ public class Ide extends JFrame {
             }
         });
 
-        var openButton = new JButton("\uD83D\uDCC2");
-        openButton.addActionListener(actionEvent -> {
-            LOGGER.debug("Open button pressed");
-            ioEventThread.fire(new Event<>(IOEventType.FILE_OPEN_EVENT));
-        });
 
         if (settingsManager.getAvailableSettings().length > 1) {
             themeChooseList.setSelectedIndex(0);
@@ -197,41 +180,6 @@ public class Ide extends JFrame {
     }
 
 
-    private Map<IOEventType, Function<List<Event<IOEventType>>, Void>> getOpenFileEvents() {
-        Map<IOEventType, Function<List<Event<IOEventType>>, Void>> result = new HashMap<>();
-
-        result.put(IOEventType.FILE_OPEN_EVENT, uiEvent -> {
-            JFileChooser fileOpenDialog = new JFileChooser();
-            int ret = fileOpenDialog.showDialog(null, "Open file");
-            if (ret == JFileChooser.APPROVE_OPTION) {
-                synchronized (this) {
-                    File inputFile = fileOpenDialog.getSelectedFile();
-
-                    LOGGER.info("Opening file {}", inputFile.getAbsolutePath());
-
-                    try (var is = new FileInputStream(inputFile);
-                         var reader = new BufferedReader(new InputStreamReader(is))) {
-
-                        textArea.setText(reader.lines().collect(Collectors.joining(System.lineSeparator())));
-
-                        var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
-                        uiEventThread.fire(event);
-                        highlightThread.fire(event);
-
-                        fileName = inputFile.getAbsolutePath();
-                    } catch (IOException e) {
-                        LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
-                    }
-                }
-            }
-
-            return null;
-        });
-
-
-        return result;
-    }
-
     private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getHighlightEvents() {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
         result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
@@ -295,5 +243,9 @@ public class Ide extends JFrame {
 
     JButton getSaveButton() {
         return saveButton;
+    }
+
+    JButton getOpenButton() {
+        return openButton;
     }
 }

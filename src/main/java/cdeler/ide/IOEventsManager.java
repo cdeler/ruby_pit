@@ -1,11 +1,16 @@
 package cdeler.ide;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -49,7 +54,42 @@ public class IOEventsManager {
             saveFile();
             return null;
         });
+
+        result.put(IOEventType.FILE_OPEN_EVENT, events -> {
+            openFile();
+            return null;
+        });
+
         return result;
+    }
+
+    private void openFile() {
+        JFileChooser fileOpenDialog = new JFileChooser();
+        int ret = fileOpenDialog.showDialog(null, "Open file");
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            synchronized (this) {
+                File inputFile = fileOpenDialog.getSelectedFile();
+
+                LOGGER.info("Opening file {}", inputFile.getAbsolutePath());
+
+                try (var is = new FileInputStream(inputFile);
+                     var reader = new BufferedReader(new InputStreamReader(is))) {
+
+                    textArea.setText(reader.lines().collect(Collectors.joining(System.lineSeparator())));
+
+                    // todo fix it
+                    //     test it, might be unnecessary
+                    // var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
+                    // uiEventThread.fire(event);
+                    // highlightThread.fire(event);
+
+                    currentFile = inputFile.getAbsoluteFile().toPath();
+                } catch (IOException e) {
+                    LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
+                }
+            }
+        }
+
     }
 
     private void initializeEventListeners(@NotNull Ide ide) {
@@ -58,6 +98,12 @@ public class IOEventsManager {
             LOGGER.error("Save button pressed");
 
             ioEventsThread.fire(new Event<>(IOEventType.FILE_SAVE_EVENT));
+        });
+
+        var openButton = ide.getOpenButton();
+        openButton.addActionListener(actionEvent -> {
+            LOGGER.debug("Open button pressed");
+            ioEventsThread.fire(new Event<>(IOEventType.FILE_OPEN_EVENT));
         });
 
     }
