@@ -1,13 +1,17 @@
 package cdeler.highlight.settings;
 
 import java.awt.*;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -31,6 +36,7 @@ import com.google.gson.JsonParseException;
 
 import cdeler.core.FontLoader;
 import cdeler.highlight.token.TokenType;
+import cdeler.ide.UIEventsManager;
 
 
 public class UISettingsManager {
@@ -64,15 +70,38 @@ public class UISettingsManager {
 
     @NotNull
     @Contract(" -> new")
-    static InputStream getSettingsFileInputStream() throws FileNotFoundException {
+    private static InputStream getSettingsFileInputStream() throws FileNotFoundException {
         Path settingsFile =
                 Paths.get(System.getProperty("user.home"),
                         SETTINGS_DIRECTORY_NAME,
                         SETTINGS_FILE_NAME).toAbsolutePath();
+
+        if (Files.notExists(settingsFile)) {
+            LOGGER.info("Creating the default settings file {}", settingsFile);
+            createDefaultSettingsFile(settingsFile);
+        }
+
         LOGGER.info("Loading themes from {}", settingsFile);
 
         return new FileInputStream(settingsFile.toFile());
     }
+
+    private static void createDefaultSettingsFile(@NotNull Path settingsFile) {
+        var parentDirectory = settingsFile.getParent().toFile();
+        if (!parentDirectory.exists() && !settingsFile.getParent().toFile().mkdirs()) {
+            LOGGER.error("Unable to create directory {} to settings file. You can create it manually and restart IDE",
+                    settingsFile.getParent().toFile());
+        }
+
+        try (InputStream is = UIEventsManager.class.getResourceAsStream("/defaut_settings.json");
+             OutputStream os = new BufferedOutputStream(new FileOutputStream(settingsFile.toFile()))) {
+
+            IOUtils.copy(is, os);
+        } catch (IOException e) {
+            LOGGER.error("Unable to install default settings file {}", settingsFile, e);
+        }
+    }
+
 
     @NotNull
     @Contract("_ -> new")
@@ -96,18 +125,13 @@ public class UISettingsManager {
             result.putAll(settingsFromFile);
         } catch (FileNotFoundException e) {
             LOGGER.info("Unable to load settings from settings file", e);
-            createDefaultSettingsFile();
         } catch (JsonParseException e) {
             LOGGER.error("Malformed settings file", e);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             LOGGER.error("Unable to load settings file", e);
         }
 
         return result;
-    }
-
-    private static void createDefaultSettingsFile() {
-        LOGGER.info("createDefaultSettingsFile() is not implemented");
     }
 
     private UISettings getActiveSettings() {
