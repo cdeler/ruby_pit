@@ -98,7 +98,8 @@ public class IOEventsManager {
             if (handledKeyboardActions.containsKey(keyStroke)) {
                 final Action action = handledKeyboardActions.get(keyStroke);
                 final ActionEvent actionEvent = new ActionEvent(e.getSource(), e.getID(), null);
-                SwingUtilities.invokeLater(() -> action.actionPerformed(actionEvent));
+
+                action.actionPerformed(actionEvent);
                 return true;
             }
             return false;
