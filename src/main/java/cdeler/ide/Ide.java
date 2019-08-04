@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import cdeler.highlight.settings.UISettingsManager;
 
 
-// created using https://stackoverflow.com/questions/36384683/highlighter-highlights-all-the-textarea-instead-of-a
-// -specific-word-and-its-occur
 public class Ide extends JFrame {
     private static final Logger LOGGER = LoggerFactory.getLogger(Ide.class);
 
@@ -65,7 +63,10 @@ public class Ide extends JFrame {
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
         topPanel.add(openButton);
         topPanel.add(saveButton);
-        topPanel.add(themeChooseList);
+
+        if (areAtLeastTwoThemesAvailable()) {
+            topPanel.add(themeChooseList);
+        }
 
         textPanel.add(scrollPane);
 
@@ -77,11 +78,16 @@ public class Ide extends JFrame {
         pack();
     }
 
+    private boolean areAtLeastTwoThemesAvailable() {
+        return settingsManager.getAvailableSettings().length > 1;
+    }
+
     private void initializeTextArea() {
         textArea.setEditable(true);
         textArea.setEditorKit(new NoWrappingEditorKit());
         textArea.setFont(settingsManager.getActiveFont());
         textArea.setBackground(settingsManager.getActiveBackgroundColor());
+        textArea.setForeground(settingsManager.getDefaultActiveStyle().getColor());
     }
 
     JTextPane getTextArea() {
