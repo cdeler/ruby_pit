@@ -90,27 +90,27 @@ public class Ide extends JFrame {
         textArea.setForeground(settingsManager.getDefaultActiveStyle().getColor());
     }
 
-    JTextPane getTextArea() {
+    public JTextPane getTextArea() {
         return textArea;
     }
 
-    JButton getSaveButton() {
+    public JButton getSaveButton() {
         return saveButton;
     }
 
-    JButton getOpenButton() {
+    public JButton getOpenButton() {
         return openButton;
     }
 
-    LineNumberedTextArea getLineNumbers() {
+    public LineNumberedTextArea getLineNumbers() {
         return lineNumbers;
     }
 
-    JComboBox getThemeChooseList() {
+    public JComboBox getThemeChooseList() {
         return themeChooseList;
     }
 
-    JPanel getTextPanel() {
+    public JPanel getTextPanel() {
         return textPanel;
     }
 }

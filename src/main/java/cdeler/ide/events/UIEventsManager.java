@@ -1,4 +1,4 @@
-package cdeler.ide;
+package cdeler.ide.events;
 
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -21,6 +21,8 @@ import cdeler.core.EventThread;
 import cdeler.core.ui.UIEventType;
 import cdeler.highlight.highlighters.TextHighlighter;
 import cdeler.highlight.settings.UISettingsManager;
+import cdeler.ide.Ide;
+import cdeler.ide.LineNumberedTextArea;
 
 public class UIEventsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(UIEventsManager.class);

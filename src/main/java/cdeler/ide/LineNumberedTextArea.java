@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import cdeler.core.ui.UIUtils;
 import cdeler.highlight.settings.UISettingsManager;
 
-class LineNumberedTextArea extends JTextArea {
+public class LineNumberedTextArea extends JTextArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(LineNumberedTextArea.class);
     private static final int MIN_SYMBOL_WIDTH = 3;
 
@@ -29,12 +29,12 @@ class LineNumberedTextArea extends JTextArea {
         setFont(uiSettingsManager.getActiveFont());
     }
 
-    synchronized void updateColors() {
+    public synchronized void updateColors() {
         setForeground(settingsManager.getActiveBackgroundColor());
         setBackground(settingsManager.getDefaultActiveStyle().getColor());
     }
 
-    synchronized void highlightCaretPosition() {
+    public synchronized void highlightCaretPosition() {
         try {
             Element textAreaRoot = textArea.getDocument().getDefaultRootElement();
 
@@ -57,7 +57,7 @@ class LineNumberedTextArea extends JTextArea {
         }
     }
 
-    synchronized void updateLineNumbers() {
+    public synchronized void updateLineNumbers() {
         int linesCount = textArea.getDocument().getDefaultRootElement().getElementCount();
 
         setText(UIUtils.formatLineNumbers(1, linesCount + 1, MIN_SYMBOL_WIDTH));

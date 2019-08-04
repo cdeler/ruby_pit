@@ -16,7 +16,7 @@
         <constructor-arg name="settingManager" ref="settings_manager"/>
     </bean>
 
-    <bean id="io_events_handler" class="cdeler.ide.IOEventsManager">
+    <bean id="io_events_handler" class="cdeler.ide.events.IOEventsManager">
         <constructor-arg name="manager">
             <bean class="cdeler.core.io.InMemoryFileManager"/>
         </constructor-arg>
@@ -24,7 +24,7 @@
         <constructor-arg name="settingsManager" ref="settings_manager"/>
     </bean>
 
-    <bean id="ui_events_handler" class="cdeler.ide.UIEventsManager">
+    <bean id="ui_events_handler" class="cdeler.ide.events.UIEventsManager">
         <constructor-arg name="ide" ref="ide_window"/>
         <constructor-arg name="highlighter" ref="highlighter"/>
         <constructor-arg name="settingsManager" ref="settings_manager"/>

@@ -36,7 +36,7 @@ import com.google.gson.JsonParseException;
 
 import cdeler.core.FontLoader;
 import cdeler.highlight.token.TokenType;
-import cdeler.ide.UIEventsManager;
+import cdeler.ide.events.UIEventsManager;
 
 
 public class UISettingsManager {

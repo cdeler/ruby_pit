@@ -1,5 +1,8 @@
-package cdeler.ide;
+package cdeler.ide.events;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +28,7 @@ import cdeler.core.EventThread;
 import cdeler.core.io.FileManager;
 import cdeler.core.io.IOEventType;
 import cdeler.highlight.settings.UISettingsManager;
+import cdeler.ide.Ide;
 
 public class IOEventsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(IOEventsManager.class);
@@ -40,6 +44,8 @@ public class IOEventsManager {
     private final JFrame ide;
     @NotNull
     private final UISettingsManager settingsManager;
+    @NotNull
+    private final Map<KeyStroke, Action> handledKeyboardActions;
 
     public IOEventsManager(@NotNull FileManager manager, @NotNull Ide ide, @NotNull UISettingsManager settingsManager) {
         this.manager = manager;
@@ -47,10 +53,13 @@ public class IOEventsManager {
         this.ide = ide;
         this.settingsManager = settingsManager;
 
+        this.handledKeyboardActions = new HashMap<>();
         this.currentFile = null;
         this.ioEventsThread = new EventThread<>();
         this.ioEventsThread.addConsumers(getIOEvents());
+
         initializeEventListeners(ide);
+        setUpSaveKeyboardEvent();
 
         new Thread(this.ioEventsThread, "io_events_thread").start();
 
@@ -71,6 +80,29 @@ public class IOEventsManager {
         });
 
         return result;
+    }
+
+    private void setUpSaveKeyboardEvent() {
+        KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
+        handledKeyboardActions.put(key, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                LOGGER.debug("Processing CTRL+S handler");
+                saveFile();
+            }
+        });
+
+        KeyboardFocusManager keyManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        keyManager.addKeyEventDispatcher(e -> {
+            KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(e);
+            if (handledKeyboardActions.containsKey(keyStroke)) {
+                final Action action = handledKeyboardActions.get(keyStroke);
+                final ActionEvent actionEvent = new ActionEvent(e.getSource(), e.getID(), null);
+                SwingUtilities.invokeLater(() -> action.actionPerformed(actionEvent));
+                return true;
+            }
+            return false;
+        });
     }
 
     private void openFile() {
@@ -145,6 +177,7 @@ public class IOEventsManager {
     }
 
     private synchronized void saveFileInternal(@NotNull Path file) {
+        LOGGER.info("Saving file {}", file);
         try {
             currentFile = file;
             manager.write(textArea.getText());
