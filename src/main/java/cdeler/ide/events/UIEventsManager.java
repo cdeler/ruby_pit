@@ -132,6 +132,10 @@ public class UIEventsManager {
                     textArea.setBackground(settingsManager.getActiveBackgroundColor());
                     textArea.setForeground(settingsManager.getDefaultActiveStyle().getColor());
 
+                    var activeFont = settingsManager.getActiveFont();
+                    textArea.setFont(activeFont);
+                    lineNumbers.setFont(activeFont);
+
                     highlightThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
                     uiThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
                 }

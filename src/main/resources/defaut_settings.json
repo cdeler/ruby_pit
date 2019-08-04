@@ -4,7 +4,7 @@
     "comments": {
       "taken_from": "https://github.com/wesbos/cobalt2-vscode/blob/master/theme/cobalt2.json"
     },
-    "fontName": "iosevka-regular",
+    "fontName": "ubuntu-mono-regular",
     "fontSize": 20,
     "backgroundColor": "#193549",
     "lineNumberColor": "#d6d5d3",
