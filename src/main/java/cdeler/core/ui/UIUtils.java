@@ -79,7 +79,5 @@ public class UIUtils {
         if (length >= 0) {
             document.setCharacterAttributes(0, textArea.getText().length(), newTextAttributes, true);
         }
-
     }
-
 }

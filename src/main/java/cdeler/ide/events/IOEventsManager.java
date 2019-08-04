@@ -183,6 +183,7 @@ public class IOEventsManager {
             currentFile = file;
             manager.write(textArea.getText());
             manager.saveFile(currentFile);
+            ide.setTitle(getNewTitle(currentFile));
         } catch (IOException e) {
             LOGGER.error("Unable to open file {}", file, e);
             SwingUtilities.invokeLater(() -> {

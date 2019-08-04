@@ -1,0 +1,46 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+    <bean id="default_ide_settings" class="cdeler.highlight.settings.UISettings">
+        <constructor-arg name="name" value="default_theme"/>
+        <constructor-arg name="fontName" value="iosevka-regular"/>
+        <constructor-arg name="fontSize" value="20"/>
+        <constructor-arg name="backgroundColor" value="#FDF6E3"/>
+        <constructor-arg name="lineNumberColor" value="#1F4662"/>
+        <constructor-arg name="defaultFontSettings">
+            <bean class="cdeler.highlight.settings.TokenStyle">
+                <constructor-arg name="color" value="#657b83"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg name="tokenStyle">
+            <map>
+                <entry key="symbol">
+                    <bean class="cdeler.highlight.settings.TokenStyle">
+                        <constructor-arg name="color" value="#859900"/>
+                    </bean>
+                </entry>
+                <entry key="string">
+                    <bean class="cdeler.highlight.settings.TokenStyle">
+                        <constructor-arg name="color" value="#2AA198"/>
+                    </bean>
+                </entry>
+                <entry key="constant">
+                    <bean class="cdeler.highlight.settings.TokenStyle">
+                        <constructor-arg name="color" value="#CB4B16"/>
+                        <constructor-arg name="italic" value="false"/>
+                        <constructor-arg name="bold" value="true"/>
+                    </bean>
+                </entry>
+                <entry key="comment">
+                    <bean class="cdeler.highlight.settings.TokenStyle">
+                        <constructor-arg name="color" value="#93A1A1"/>
+                        <constructor-arg name="italic" value="true"/>
+                        <constructor-arg name="bold" value="false"/>
+                    </bean>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+</beans>
