@@ -1,9 +1,0 @@
-Linux
-
-mkdir obj
-gcc -fPIC -shared -I ../../../src/main/c/ruby-parser -I ../../../src/main/c/tree-sitter-ruby/src/ -I . -I ../../../src/main/c/tree-sitter/lib/include -I /usr/lib/jvm/java-11-openjdk-amd64/include/ -I /usr/lib/jvm/java-11-openjdk-amd64/include/linux tree-sitter-ruby.c -o obj/tree-sitter-ruby.o
-gcc -fPIC -c -I ../../../src/main/c/ruby-parser -I ../../../src/main/c/tree-sitter-ruby/src/ -I . -I ../../../src/main/c/tree-sitter/lib/include -I /usr/lib/jvm/java-11-openjdk-amd64/include/ -I /usr/lib/jvm/java-11-openjdk-amd64/include/linux tree-sitter-ruby.c -o obj/tree-sitter-ruby.o
-gcc -fPIC -c -I ../../../src/main/c/ruby-parser -I ../../../src/main/c/tree-sitter-ruby/src/ -I . -I ../../../src/main/c/tree-sitter/lib/include -I /usr/lib/jvm/java-11-openjdk-amd64/include/ -I /usr/lib/jvm/java-11-openjdk-amd64/include/linux parser.c -o obj/parser.o
-g++ -fPIC -c -I ../../../src/main/c/ruby-parser -I ../../../src/main/c/tree-sitter-ruby/src/ -I . -I ../../../src/main/c/tree-sitter/lib/include -I /usr/lib/jvm/java-11-openjdk-amd64/include/ -I /usr/lib/jvm/java-11-openjdk-amd64/include/linux scanner.cc -o obj/scanner.o
-
-gcc -shared -fPIC obj/* libtree-sitter.a -o libr_tree_sitter.so
