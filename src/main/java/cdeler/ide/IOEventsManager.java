@@ -53,6 +53,8 @@ public class IOEventsManager {
         initializeEventListeners(ide);
 
         new Thread(this.ioEventsThread, "io_events_thread").start();
+
+        LOGGER.info("IOEventsManager has been initialized");
     }
 
     private Map<IOEventType, Function<List<Event<IOEventType>>, Void>> getIOEvents() {

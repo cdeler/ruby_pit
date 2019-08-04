@@ -24,11 +24,16 @@
         <constructor-arg name="settingsManager" ref="settings_manager"/>
     </bean>
 
+    <bean id="ui_events_handler" class="cdeler.ide.UIEventsManager">
+        <constructor-arg name="ide" ref="ide_window"/>
+        <constructor-arg name="highlighter" ref="highlighter"/>
+        <constructor-arg name="settingsManager" ref="settings_manager"/>
+    </bean>
+
     <bean id="ide_window" class="cdeler.ide.Ide">
         <constructor-arg name="windowWidth" value="800"/>
         <constructor-arg name="windowHeight" value="600"/>
         <constructor-arg name="iconPath" value="/icons8-ruby-programming-language-64.png"/>
-        <constructor-arg name="highlighter" ref="highlighter"/>
         <constructor-arg name="settingsManager" ref="settings_manager"/>
     </bean>
 
