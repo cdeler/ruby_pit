@@ -24,12 +24,14 @@ public class Ide extends JFrame {
     private final JButton saveButton;
     private final JButton openButton;
     private final JPanel textPanel;
+    private final JScrollPane textPanelScrollPane;
 
     public Ide(int windowWidth, int windowHeight, String iconPath, UISettingsManager settingsManager) {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
         this.textArea = new JTextPane(new DefaultStyledDocument());
+        this.textPanelScrollPane = new JScrollPane(textArea);
         this.lineNumbers = new LineNumberedTextArea(settingsManager, textArea);
         this.settingsManager = settingsManager;
         this.saveButton = new JButton("\uD83D\uDCBE");
@@ -54,10 +56,9 @@ public class Ide extends JFrame {
 
         initializeTextArea();
 
-        var scrollPane = new JScrollPane(textArea);
-        scrollPane.setRowHeaderView(lineNumbers);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        textPanelScrollPane.setRowHeaderView(lineNumbers);
+        textPanelScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        textPanelScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         var topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
@@ -68,7 +69,7 @@ public class Ide extends JFrame {
             topPanel.add(themeChooseList);
         }
 
-        textPanel.add(scrollPane);
+        textPanel.add(textPanelScrollPane);
 
         add(topPanel, BorderLayout.NORTH);
         add(textPanel, BorderLayout.CENTER);
@@ -113,4 +114,9 @@ public class Ide extends JFrame {
     public JPanel getTextPanel() {
         return textPanel;
     }
+
+    public JScrollPane getTextPanelScrollPane() {
+        return textPanelScrollPane;
+    }
+
 }

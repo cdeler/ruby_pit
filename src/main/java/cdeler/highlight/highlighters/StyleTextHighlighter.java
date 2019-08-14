@@ -7,7 +7,6 @@ import javax.swing.text.StyledDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cdeler.core.ui.UIUtils;
 import cdeler.highlight.settings.UISettingsManager;
 import cdeler.highlight.token.TokenType;
 import cdeler.highlight.token.Tokenizer;
@@ -21,7 +20,8 @@ class StyleTextHighlighter extends BaseTextHighlighter {
 
     @Override
     protected void clearHighlight(JTextPane textArea) {
-        UIUtils.changeTextPaneAttributes(textArea, settingsManager.getDefaultActiveStyle().asAttributeSet());
+        LOGGER.error("Skip clearHighlight");
+        // UIUtils.changeTextPaneAttributes(textArea, settingsManager.getDefaultActiveStyle().asAttributeSet());
     }
 
     @Override

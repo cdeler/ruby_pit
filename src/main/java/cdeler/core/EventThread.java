@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class EventThread<EventType extends Enum> implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventThread.class);
-    private static final int HANDLED_EVENTS_THRESHOLD = 75;
+    private static final int HANDLED_EVENTS_THRESHOLD = 20;
     private static final int DELAY_SIZE_MS = 250;
 
     private final BlockingQueue<Event<EventType>> eventQueue;

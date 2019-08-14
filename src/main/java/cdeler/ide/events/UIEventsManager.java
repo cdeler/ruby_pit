@@ -42,6 +42,8 @@ public class UIEventsManager {
     private final UISettingsManager settingsManager;
     @NotNull
     private final JPanel textPanel;
+    @NotNull
+    private final JScrollPane textPanelScrollPane;
 
     public UIEventsManager(@NotNull Ide ide, @NotNull TextHighlighter highlighter,
                            @NotNull UISettingsManager settingsManager) {
@@ -49,6 +51,7 @@ public class UIEventsManager {
         this.lineNumbers = ide.getLineNumbers();
         this.themeChooseList = ide.getThemeChooseList();
         this.textPanel = ide.getTextPanel();
+        this.textPanelScrollPane = ide.getTextPanelScrollPane();
         this.highlighter = highlighter;
         this.settingsManager = settingsManager;
 
@@ -182,17 +185,17 @@ public class UIEventsManager {
     private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getHighlightEvents() {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
         result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
-            highlighter.highlight(textArea);
+            highlighter.highlight(textArea, textPanelScrollPane);
 
             return null;
         });
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
-            highlighter.highlight(textArea);
+            highlighter.highlight(textArea, textPanelScrollPane);
 
             return null;
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
-            highlighter.highlight(textArea);
+            highlighter.highlight(textArea, textPanelScrollPane);
 
             return null;
         });
