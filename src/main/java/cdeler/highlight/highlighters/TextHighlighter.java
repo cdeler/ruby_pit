@@ -3,5 +3,7 @@ package cdeler.highlight.highlighters;
 import javax.swing.*;
 
 public interface TextHighlighter {
-    void highlight(JTextPane textArea, JScrollPane scrollPane);
+    void highlightVisible(JTextPane textArea);
+
+    void highlightAll(JTextPane textArea);
 }

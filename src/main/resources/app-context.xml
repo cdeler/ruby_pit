@@ -24,6 +24,7 @@
         </constructor-arg>
         <constructor-arg name="ide" ref="ide_window"/>
         <constructor-arg name="settingsManager" ref="settings_manager"/>
+        <constructor-arg name="uiEventsManager" ref="ui_events_handler"/>
     </bean>
 
     <bean id="ui_events_handler" class="cdeler.ide.events.UIEventsManager">

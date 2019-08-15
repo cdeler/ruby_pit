@@ -43,7 +43,7 @@ public class UIEventsManager {
     @NotNull
     private final JPanel textPanel;
     @NotNull
-    private final JScrollPane textPanelScrollPane;
+    private final JScrollPane scrollPane;
 
     public UIEventsManager(@NotNull Ide ide, @NotNull TextHighlighter highlighter,
                            @NotNull UISettingsManager settingsManager) {
@@ -51,7 +51,7 @@ public class UIEventsManager {
         this.lineNumbers = ide.getLineNumbers();
         this.themeChooseList = ide.getThemeChooseList();
         this.textPanel = ide.getTextPanel();
-        this.textPanelScrollPane = ide.getTextPanelScrollPane();
+        this.scrollPane = ide.getTextPanelScrollPane();
         this.highlighter = highlighter;
         this.settingsManager = settingsManager;
 
@@ -66,16 +66,24 @@ public class UIEventsManager {
         new Thread(uiThread, "ui_event_thread").start();
         new Thread(highlightThread, "highlight_thread").start();
 
+        redrawAll();
+
+        LOGGER.info("UIEventsManager has been initialized");
+    }
+
+    void redrawAll() {
         var initializeCompleted = new Event<>(UIEventType.UI_INITIALIZE);
         uiThread.fire(initializeCompleted);
         highlightThread.fire(initializeCompleted);
-
-        LOGGER.info("UIEventsManager has been initialized");
     }
 
     private void initializeEventListeners() {
         initializeTextChangeRelatedEvents();
         initializeThemeChooseListEvents();
+
+        scrollPane.getViewport().addChangeListener(changeEvent ->
+                highlightThread.fire(new Event<>(UIEventType.REDRAW_VISIBLE_HIGHLIGHT))
+        );
 
         textPanel.addComponentListener(new ComponentListener() {
             @Override
@@ -150,29 +158,36 @@ public class UIEventsManager {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
 
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
+            LOGGER.error("UIEventType.TEXT_AREA_TEXT_CHANGED");
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.CARET_UPDATE, uiEvents -> {
+            LOGGER.error("UIEventType.CARET_UPDATE");
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.WINDOW_RESIZE, uiEvents -> {
+            LOGGER.error("UIEventType.WINDOW_RESIZE");
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
+            LOGGER.error("UIEventType.UI_INITIALIZE");
+
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
+            LOGGER.error("UIEventType.REDRAW_HIGHLIGHT");
+
             lineNumbers.updateColors();
             lineNumbers.highlightCaretPosition();
 
@@ -185,17 +200,30 @@ public class UIEventsManager {
     private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getHighlightEvents() {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
         result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
-            highlighter.highlight(textArea, textPanelScrollPane);
+            LOGGER.error("UIEventType.REDRAW_HIGHLIGHT");
+
+            highlighter.highlightAll(textArea);
 
             return null;
         });
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
-            highlighter.highlight(textArea, textPanelScrollPane);
+            LOGGER.error("UIEventType.TEXT_AREA_TEXT_CHANGED");
+
+            highlighter.highlightVisible(textArea);
+
+            return null;
+        });
+        result.put(UIEventType.REDRAW_VISIBLE_HIGHLIGHT, uiEvent -> {
+            LOGGER.error("UIEventType.REDRAW_VISIBLE_HIGHLIGHT");
+
+            highlighter.highlightVisible(textArea);
 
             return null;
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
-            highlighter.highlight(textArea, textPanelScrollPane);
+            LOGGER.error("UIEventType.UI_INITIALIZE");
+
+            highlighter.highlightAll(textArea);
 
             return null;
         });

@@ -30,15 +30,16 @@ public class Ide extends JFrame {
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
         this.iconPath = iconPath;
-        this.textArea = new JTextPane(new DefaultStyledDocument());
-        this.textPanelScrollPane = new JScrollPane(textArea);
-        this.lineNumbers = new LineNumberedTextArea(settingsManager, textArea);
         this.settingsManager = settingsManager;
-        this.saveButton = new JButton("\uD83D\uDCBE");
-        this.openButton = new JButton("\uD83D\uDCC2");
-        this.textPanel = new JPanel(new BorderLayout());
 
-        this.themeChooseList = new JComboBox(settingsManager.getAvailableSettings());
+        textArea = new JTextPane(new DefaultStyledDocument());
+        lineNumbers = new LineNumberedTextArea(settingsManager, textArea);
+        saveButton = new JButton("\uD83D\uDCBE");
+        openButton = new JButton("\uD83D\uDCC2");
+        textPanel = new JPanel(new BorderLayout());
+        textPanelScrollPane = new JScrollPane(textArea);
+        themeChooseList = new JComboBox(settingsManager.getAvailableSettings());
+
         uiInitialize();
 
         LOGGER.info("Ide has been initialized");
@@ -118,5 +119,4 @@ public class Ide extends JFrame {
     public JScrollPane getTextPanelScrollPane() {
         return textPanelScrollPane;
     }
-
 }

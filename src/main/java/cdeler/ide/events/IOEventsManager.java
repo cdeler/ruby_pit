@@ -13,10 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
+import javax.swing.text.BadLocationException;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +36,7 @@ public class IOEventsManager {
     @NotNull
     private final FileManager manager;
     @NotNull
-    private final JTextComponent textArea;
+    private final JTextPane textArea;
     @NotNull
     private final EventThread<IOEventType> ioEventsThread;
     @NotNull
@@ -46,12 +45,21 @@ public class IOEventsManager {
     private final UISettingsManager settingsManager;
     @NotNull
     private final Map<KeyStroke, Action> handledKeyboardActions;
+    @NotNull
+    private final JButton openButton;
+    @NotNull
+    private final UIEventsManager uiEventsManager;
 
-    public IOEventsManager(@NotNull FileManager manager, @NotNull Ide ide, @NotNull UISettingsManager settingsManager) {
+    public IOEventsManager(@NotNull FileManager manager,
+                           @NotNull Ide ide,
+                           @NotNull UISettingsManager settingsManager,
+                           @NotNull UIEventsManager uiEventsManager) {
         this.manager = manager;
+        this.openButton = ide.getOpenButton();
         this.textArea = ide.getTextArea();
         this.ide = ide;
         this.settingsManager = settingsManager;
+        this.uiEventsManager = uiEventsManager;
 
         this.handledKeyboardActions = new HashMap<>();
         this.currentFile = null;
@@ -110,28 +118,37 @@ public class IOEventsManager {
         JFileChooser fileOpenDialog = new JFileChooser();
         int ret = fileOpenDialog.showDialog(null, "Open file");
         if (ret == JFileChooser.APPROVE_OPTION) {
-            synchronized (this) {
-                File inputFile = fileOpenDialog.getSelectedFile();
+            File inputFile = fileOpenDialog.getSelectedFile();
 
-                LOGGER.info("Opening file {}", inputFile.getAbsolutePath());
+            LOGGER.info("Opening file {}", inputFile.getAbsolutePath());
 
-                try (var is = new FileInputStream(inputFile);
-                     var reader = new BufferedReader(new InputStreamReader(is))) {
+            try (var is = new FileInputStream(inputFile);
+                 var reader = new BufferedReader(new InputStreamReader(is))) {
+                openButton.setEnabled(false);
 
-                    textArea.setText(reader.lines().collect(Collectors.joining(System.lineSeparator())));
+                var newDoc = textArea.getEditorKit().createDefaultDocument();
 
-                    // todo fix it
-                    //     test it, might be unnecessary
-                    // var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
-                    // uiEventThread.fire(event);
-                    // highlightThread.fire(event);
+                var style = settingsManager.getDefaultActiveStyle().asAttributeSet();
+                reader.lines().forEachOrdered(line -> {
+                    try {
+                        var lineToInsert = line + System.lineSeparator();
+                        newDoc.insertString(newDoc.getLength(), lineToInsert, style);
+                    } catch (BadLocationException ignored) {
+                    }
+                });
 
-                    currentFile = inputFile.getAbsoluteFile().toPath();
+                textArea.setDocument(newDoc);
 
-                    ide.setTitle(getNewTitle(currentFile));
-                } catch (IOException e) {
-                    LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
-                }
+                currentFile = inputFile.getAbsoluteFile().toPath();
+
+                ide.setTitle(getNewTitle(currentFile));
+
+                // fire "text change" event
+                uiEventsManager.redrawAll();
+            } catch (IOException e) {
+                LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
+            } finally {
+                openButton.setEnabled(true);
             }
         }
     }
@@ -156,7 +173,6 @@ public class IOEventsManager {
             ioEventsThread.fire(new Event<>(IOEventType.FILE_SAVE_EVENT));
         });
 
-        var openButton = ide.getOpenButton();
         openButton.addActionListener(actionEvent -> {
             LOGGER.debug("Open button pressed");
             ioEventsThread.fire(new Event<>(IOEventType.FILE_OPEN_EVENT));
