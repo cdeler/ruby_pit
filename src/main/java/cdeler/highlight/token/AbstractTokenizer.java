@@ -16,7 +16,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer {
     protected abstract List<Token> build(T data);
 
     @Override
-    final public synchronized List<Token> harvest(String inputText) {
+    final public List<Token> harvest(String inputText) {
         try {
             T intermediateData = feed(inputText);
             return build(intermediateData);

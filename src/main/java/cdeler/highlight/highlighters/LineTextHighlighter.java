@@ -1,5 +1,7 @@
 package cdeler.highlight.highlighters;
 
+import java.awt.*;
+
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -33,7 +35,8 @@ public class LineTextHighlighter extends BaseTextHighlighter {
     }
 
     @Override
-    protected void clearHighlight(JTextPane textArea) {
+    protected void clearHighlight(JTextPane textArea, Rectangle clearArea) {
         textArea.getHighlighter().removeAllHighlights();
     }
+
 }

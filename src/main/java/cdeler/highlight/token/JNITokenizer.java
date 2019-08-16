@@ -28,11 +28,10 @@ public class JNITokenizer extends AbstractTokenizer<Optional<AST<Token>>> {
 
     @Override
     protected Optional<AST<Token>> feed(String inputText) throws HighlightException {
-        synchronized (this) {
-            var nativeResult = feed_internal(inputText);
+        var nativeResult = feed_internal(inputText);
 
-            return Optional.ofNullable(nativeResult);
-        }
+        return Optional.ofNullable(nativeResult);
+
     }
 
     @Override

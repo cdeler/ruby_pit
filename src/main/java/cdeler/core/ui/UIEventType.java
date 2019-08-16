@@ -6,4 +6,5 @@ public enum UIEventType {
     WINDOW_RESIZE,
     UI_INITIALIZE,
     REDRAW_HIGHLIGHT,
+    REDRAW_VISIBLE_HIGHLIGHT,
 }
