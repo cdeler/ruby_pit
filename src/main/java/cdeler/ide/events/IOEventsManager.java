@@ -137,14 +137,16 @@ public class IOEventsManager {
                     }
                 });
 
+                uiEventsManager.hookDocumentListeners(newDoc);
+
                 textArea.setDocument(newDoc);
 
                 currentFile = inputFile.getAbsoluteFile().toPath();
 
                 ide.setTitle(getNewTitle(currentFile));
 
-                // fire "text change" event
-                uiEventsManager.redrawAll();
+                // the "redraw all" event should be fired only if swing draw has been complete
+                EventQueue.invokeLater(uiEventsManager::redrawAll);
             } catch (IOException e) {
                 LOGGER.error("Unable to read file " + inputFile.getAbsolutePath(), e);
             } finally {

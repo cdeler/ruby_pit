@@ -1,5 +1,6 @@
 package cdeler.ide.events;
 
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
@@ -11,6 +12,7 @@ import java.util.function.Function;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -66,7 +68,7 @@ public class UIEventsManager {
         new Thread(uiThread, "ui_event_thread").start();
         new Thread(highlightThread, "highlight_thread").start();
 
-        redrawAll();
+        EventQueue.invokeLater(this::redrawAll);
 
         LOGGER.info("UIEventsManager has been initialized");
     }
@@ -106,7 +108,13 @@ public class UIEventsManager {
     }
 
     private void initializeTextChangeRelatedEvents() {
-        textArea.getDocument().addDocumentListener(new DocumentListener() {
+        hookDocumentListeners(textArea.getDocument());
+
+        textArea.addCaretListener(caretEvent -> uiThread.fire(new Event<>(UIEventType.CARET_UPDATE)));
+    }
+
+    public void hookDocumentListeners(Document document) {
+        document.addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
                 LOGGER.debug("insertUpdate");
@@ -127,8 +135,6 @@ public class UIEventsManager {
             public void changedUpdate(DocumentEvent documentEvent) {
             }
         });
-
-        textArea.addCaretListener(caretEvent -> uiThread.fire(new Event<>(UIEventType.CARET_UPDATE)));
     }
 
     private void initializeThemeChooseListEvents() {

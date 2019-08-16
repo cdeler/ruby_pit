@@ -4,11 +4,9 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.swing.*;
 
-import org.apache.commons.lang3.concurrent.ConcurrentUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,30 +27,36 @@ abstract class BaseTextHighlighter implements TextHighlighter {
     @NotNull
     protected final UISettingsManager settingsManager;
     @NotNull
-    private volatile Future<Boolean> areaHighlightEvent;
+    private volatile HighlightEvent areaHighlightEvent;
     @NotNull
     private final ExecutorService executor;
 
     public BaseTextHighlighter(@NotNull Tokenizer tokenizer, @NotNull UISettingsManager settingManager) {
         this.tokenizer = tokenizer;
         this.settingsManager = settingManager;
-        this.areaHighlightEvent = ConcurrentUtils.constantFuture(true);
+        this.areaHighlightEvent = HighlightEvent.emptyEvent();
 
         this.executor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("highlight-pool-"));
     }
 
     @Override
-    public void highlightAll(JTextPane textArea) {
-        if (isVisibleAreaHighlightEventInProgress()) {
-            areaHighlightEvent.cancel(true);
+    public synchronized void highlightAll(JTextPane textArea) {
+        if (areaHighlightEvent.isInProgress()) {
+            var isCanceled = areaHighlightEvent.preemptiveCancelBy(HighlightEventPriority.REDRAW_ALL);
+
+            if (!isCanceled) {
+                LOGGER.error("Current event {} has more priority than new one {}. Skip.",
+                        areaHighlightEvent, HighlightEventPriority.REDRAW_ALL);
+                return;
+            }
         }
 
-        var tokens = tokenizer.harvest(textArea.getText());
-
-        areaHighlightEvent = executor.submit(() -> {
+        var future = executor.submit(() -> {
             LOGGER.error("Enter highlightAll");
 
             Thread.sleep(HIGHLIGHT_SLEEP_DELAY_MS);
+
+            var tokens = tokenizer.harvest(textArea.getText());
 
             var workArea = new Rectangle(0, 0, textArea.getWidth(), textArea.getHeight());
 
@@ -63,20 +67,27 @@ abstract class BaseTextHighlighter implements TextHighlighter {
             return true;
         });
 
+        areaHighlightEvent = new HighlightEvent(HighlightEventPriority.REDRAW_ALL, future);
     }
 
     @Override
-    public void highlightVisible(JTextPane textArea) {
-        if (isVisibleAreaHighlightEventInProgress()) {
-            areaHighlightEvent.cancel(true);
+    public synchronized void highlightVisible(JTextPane textArea) {
+        if (areaHighlightEvent.isInProgress()) {
+            var isCanceled = areaHighlightEvent.preemptiveCancelBy(HighlightEventPriority.REDRAW_VISIBLE_PART);
+
+            if (!isCanceled) {
+                LOGGER.error("Current event {} has more priority than new one {}. Skip.",
+                        areaHighlightEvent, HighlightEventPriority.REDRAW_VISIBLE_PART);
+                return;
+            }
         }
 
-        var tokens = tokenizer.harvest(textArea.getText());
-
-        areaHighlightEvent = executor.submit(() -> {
+        var future = executor.submit(() -> {
             LOGGER.error("Enter highlightVisible");
 
             Thread.sleep(HIGHLIGHT_SLEEP_DELAY_MS);
+
+            var tokens = tokenizer.harvest(textArea.getText());
 
             var visibleRect = textArea.getVisibleRect();
 
@@ -86,6 +97,8 @@ abstract class BaseTextHighlighter implements TextHighlighter {
 
             return true;
         });
+
+        areaHighlightEvent = new HighlightEvent(HighlightEventPriority.REDRAW_VISIBLE_PART, future);
     }
 
     private void highlightInternal(@NotNull JTextPane textArea,
@@ -126,10 +139,6 @@ abstract class BaseTextHighlighter implements TextHighlighter {
                 }
             }
         });
-    }
-
-    private boolean isVisibleAreaHighlightEventInProgress() {
-        return !areaHighlightEvent.isCancelled() || !areaHighlightEvent.isDone();
     }
 
     private static boolean intersectsWithWorkingArea(Rectangle workingArea, int lineHeight, TokenLocation location) {
