@@ -76,7 +76,7 @@ public class UIEventsManager {
     void redrawAll() {
         var initializeCompleted = new Event<>(UIEventType.UI_INITIALIZE);
         uiThread.fire(initializeCompleted);
-        highlightThread.fire(initializeCompleted);
+        SwingUtilities.invokeLater(() -> highlightThread.fire(initializeCompleted));
     }
 
     private void initializeEventListeners() {
@@ -84,7 +84,8 @@ public class UIEventsManager {
         initializeThemeChooseListEvents();
 
         scrollPane.getViewport().addChangeListener(changeEvent ->
-                highlightThread.fire(new Event<>(UIEventType.REDRAW_VISIBLE_HIGHLIGHT))
+                SwingUtilities.invokeLater(() ->
+                        highlightThread.fire(new Event<>(UIEventType.REDRAW_VISIBLE_HIGHLIGHT)))
         );
 
         textPanel.addComponentListener(new ComponentListener() {
@@ -120,7 +121,7 @@ public class UIEventsManager {
                 LOGGER.debug("insertUpdate");
                 var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
                 uiThread.fire(event);
-                highlightThread.fire(event);
+                SwingUtilities.invokeLater(() -> highlightThread.fire(event));
             }
 
             @Override
@@ -128,7 +129,8 @@ public class UIEventsManager {
                 LOGGER.debug("removeUpdate");
                 var event = new Event<>(UIEventType.TEXT_AREA_TEXT_CHANGED);
                 uiThread.fire(event);
-                highlightThread.fire(event);
+
+                SwingUtilities.invokeLater(() -> highlightThread.fire(event));
             }
 
             @Override
@@ -153,8 +155,10 @@ public class UIEventsManager {
                     textArea.setFont(activeFont);
                     lineNumbers.setFont(activeFont);
 
-                    highlightThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
-                    uiThread.fire(new Event<>(UIEventType.REDRAW_HIGHLIGHT));
+                    var event = new Event<>(UIEventType.REDRAW_HIGHLIGHT);
+
+                    SwingUtilities.invokeLater(() -> highlightThread.fire(event));
+                    uiThread.fire(event);
                 }
             });
         }
