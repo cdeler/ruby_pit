@@ -168,27 +168,27 @@ public class UIEventsManager {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
 
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
-            LOGGER.error("UIEventType.TEXT_AREA_TEXT_CHANGED");
+            LOGGER.debug("UIEventType.TEXT_AREA_TEXT_CHANGED");
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.CARET_UPDATE, uiEvents -> {
-            LOGGER.error("UIEventType.CARET_UPDATE");
+            LOGGER.debug("UIEventType.CARET_UPDATE");
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.WINDOW_RESIZE, uiEvents -> {
-            LOGGER.error("UIEventType.WINDOW_RESIZE");
+            LOGGER.debug("UIEventType.WINDOW_RESIZE");
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
 
             return null;
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
-            LOGGER.error("UIEventType.UI_INITIALIZE");
+            LOGGER.debug("UIEventType.UI_INITIALIZE");
 
             lineNumbers.updateLineNumbers();
             lineNumbers.highlightCaretPosition();
@@ -196,7 +196,7 @@ public class UIEventsManager {
             return null;
         });
         result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
-            LOGGER.error("UIEventType.REDRAW_HIGHLIGHT");
+            LOGGER.debug("UIEventType.REDRAW_HIGHLIGHT");
 
             lineNumbers.updateColors();
             lineNumbers.highlightCaretPosition();
@@ -210,28 +210,28 @@ public class UIEventsManager {
     private Map<UIEventType, Function<List<Event<UIEventType>>, Void>> getHighlightEvents() {
         Map<UIEventType, Function<List<Event<UIEventType>>, Void>> result = new HashMap<>();
         result.put(UIEventType.REDRAW_HIGHLIGHT, uiEvents -> {
-            LOGGER.error("UIEventType.REDRAW_HIGHLIGHT");
+            LOGGER.debug("UIEventType.REDRAW_HIGHLIGHT");
 
             highlighter.highlightAll(textArea);
 
             return null;
         });
         result.put(UIEventType.TEXT_AREA_TEXT_CHANGED, uiEvent -> {
-            LOGGER.error("UIEventType.TEXT_AREA_TEXT_CHANGED");
+            LOGGER.debug("UIEventType.TEXT_AREA_TEXT_CHANGED");
 
             highlighter.highlightVisible(textArea);
 
             return null;
         });
         result.put(UIEventType.REDRAW_VISIBLE_HIGHLIGHT, uiEvent -> {
-            LOGGER.error("UIEventType.REDRAW_VISIBLE_HIGHLIGHT");
+            LOGGER.debug("UIEventType.REDRAW_VISIBLE_HIGHLIGHT");
 
             highlighter.highlightVisible(textArea);
 
             return null;
         });
         result.put(UIEventType.UI_INITIALIZE, uiEvents -> {
-            LOGGER.error("UIEventType.UI_INITIALIZE");
+            LOGGER.debug("UIEventType.UI_INITIALIZE");
 
             highlighter.highlightAll(textArea);
 

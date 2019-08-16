@@ -45,14 +45,14 @@ abstract class BaseTextHighlighter implements TextHighlighter {
             var isCanceled = areaHighlightEvent.preemptiveCancelBy(HighlightEventPriority.REDRAW_ALL);
 
             if (!isCanceled) {
-                LOGGER.error("Current event {} has more priority than new one {}. Skip.",
+                LOGGER.debug("Current event {} has more priority than new one {}. Skip.",
                         areaHighlightEvent, HighlightEventPriority.REDRAW_ALL);
                 return;
             }
         }
 
         var future = executor.submit(() -> {
-            LOGGER.error("Enter highlightAll");
+            LOGGER.debug("Enter highlightAll");
 
             Thread.sleep(HIGHLIGHT_SLEEP_DELAY_MS);
 
@@ -62,7 +62,7 @@ abstract class BaseTextHighlighter implements TextHighlighter {
 
             highlightInternal(textArea, tokens, workArea);
 
-            LOGGER.error("Leave highlightAll");
+            LOGGER.debug("Leave highlightAll");
 
             return true;
         });
@@ -76,14 +76,14 @@ abstract class BaseTextHighlighter implements TextHighlighter {
             var isCanceled = areaHighlightEvent.preemptiveCancelBy(HighlightEventPriority.REDRAW_VISIBLE_PART);
 
             if (!isCanceled) {
-                LOGGER.error("Current event {} has more priority than new one {}. Skip.",
+                LOGGER.debug("Current event {} has more priority than new one {}. Skip.",
                         areaHighlightEvent, HighlightEventPriority.REDRAW_VISIBLE_PART);
                 return;
             }
         }
 
         var future = executor.submit(() -> {
-            LOGGER.error("Enter highlightVisible");
+            LOGGER.debug("Enter highlightVisible");
 
             Thread.sleep(HIGHLIGHT_SLEEP_DELAY_MS);
 
@@ -93,7 +93,7 @@ abstract class BaseTextHighlighter implements TextHighlighter {
 
             highlightInternal(textArea, tokens, visibleRect);
 
-            LOGGER.error("Leave highlightVisible");
+            LOGGER.debug("Leave highlightVisible");
 
             return true;
         });
@@ -105,7 +105,7 @@ abstract class BaseTextHighlighter implements TextHighlighter {
                                    @NotNull List<Token> tokens,
                                    @NotNull Rectangle workingArea) {
         if (workingArea.isEmpty()) {
-            LOGGER.error("Cannot proceed with empty working area {}", workingArea);
+            LOGGER.warn("Cannot proceed with empty working area {}", workingArea);
             return;
         }
 
